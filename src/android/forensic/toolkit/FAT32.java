@@ -110,6 +110,7 @@ public class FAT32 extends FAT12{
         a.append(String.format("\n%-22s\t\t%s","Signature",signature));
     }
     
+    @Override
         public void readFAT(javax.swing.JTextArea a) throws IOException {
         byte[] ar;
         
@@ -141,41 +142,120 @@ ar=new byte[((int)sectors_per_FATL)*bytes_per_Sector];//16*16*100];
 //        diskAccess.seek(reserved_sectors * bytes_per_Sector);
 //        System.out.println("File pointer at " + diskAccess.getFilePointer());
             int j = 0;
-            while(j < 4096){
+            int old_j=0 ,new_j;
+            filelister:
+            while(j < 40960){
                     System.out.println(j);
-        
-        for(i=j;i<(j+11);i++)
-           a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                System.out.println(i);
-        int attribute = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]));
+        int attribute = Utils.hexToInt(Utils.hex(ar[i=j+11]), "0");    //Byte 11 attribute
         switch(attribute){
-            case 0x01:  a.append("\t READ ONLY\t");
+            case 0x01:  a.append("\t READ ONLY\n");
                         break;
-            case 0x02:  a.append("\t HIDDEN\t");
+            case 0x02:  a.append("\t HIDDEN\n");
                         break;
-            case 0x04:  a.append("\t SYSTEM\t");
+            case 0x04:  a.append("\t SYSTEM\n");
                         break;
-            case 0x08:  a.append("\t VOLUME ID\t");
+            case 0x08:  for(i=j;i<=(j+10);i++)          //Byte 0-10 filename
+                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+                        a.append("\t VOLUME ID\n");
                         break;
-            case 0x10:  a.append("\t DIRECTORY\t");
+            case 0x16:  System.err.println(Utils.hexToInt(Utils.hex(ar[j+6]), "0"));
+                switch (Utils.hexToInt(Utils.hex(ar[j+6]), "0")) {
+                    case 0x7E:
+                        new_j = j;
+                         j -= 32;
+                        if(Utils.hexToInt(Utils.hex(ar[j]), "0")==0xE5)
+                            a.append("<font color='red'>DELETED\t");
+                        else
+                            a.append("<font color='black'>");
+                        while (j > old_j) {
+                            for (i = j + 2; i <= (j + 10); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            for (i = j + 15; i <= (j + 25); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            for (i = j + 29; i <= (j + 31); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            j -= 32;
+                        }
+                        a.append("</font>");
+                        j = new_j;
                         break;
-            case 0x20:  a.append("\t ARCHIVE\t");
+                    default:
+                        for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
+                        {
+                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+                        }
                         break;
-            case 0x0F:  a.append("\t LFN\t");
+
+                }
+
+                a.append("\t DIRECTORY\n");
                         break;
-            default: a.append("\t "+attribute+"\t");
+            case 0x20:
+                System.err.println(Utils.hexToInt(Utils.hex(ar[j+6]), "0"));
+                switch (Utils.hexToInt(Utils.hex(ar[j+6]), "0")) {
+                    case 0x7E:
+                        new_j = j;
+                         j -= 32;
+                        if(Utils.hexToInt(Utils.hex(ar[j]), "0")==0xE5)
+                            a.append("DELETED\t");
+                        while (j > old_j) {
+                            for (i = j + 2; i <= (j + 10); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            for (i = j + 15; i <= (j + 25); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            for (i = j + 29; i <= (j + 31); i += 3) {
+                                a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i]))));
+                            }
+                            j -= 32;
+                        }
+                        j = new_j;
+                        break;
+                    default:
+                        for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
+                        {
+                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+                        }
+                        break;
+
+                }
+
+                a.append("\t ARCHIVE\t");
+                i = j + 20;           //Byte 20-21 starting sector high order 
+                //Byte 26-27 starting sector low  order 
+                a.append("@ sector " + String.valueOf(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i += 5]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), "0", "0", "0", "0")) + "\t ");
+                //Bytes 28-31 file size
+                a.append(Utils.getSize(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), "0", "0", "0", "0")) + "\n");
+                old_j = j;
+                        break;
+            case 0x0F:  
+//                a.append("\t LFN\t");
+                        
+//                        for(i=j+2;i<=(j+10);i+=3)
+//                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i])+Utils.hex(ar[--i]))));
+//                        for(i=j+15;i<=(j+25);i+=3)
+//                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i])+Utils.hex(ar[--i]))));
+//                        for(i=j+29;i<=(j+31);i+=3)
+//                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i])+Utils.hex(ar[--i]))));
+//                        a.append("\n");
+                System.out.println("Skipped: "+j);
+                        //j+=32;
+                        break;
+            default: a.append("\t "+attribute+"\n");
                         break;
         }
-        i = j+20;
+
 //                System.out.println("@ sector  "+ String.valueOf(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i+=5]), Utils.hex(ar[i++]), Utils.hex(ar[i++])))+"\t ");
 //       System.out.println(String.valueOf(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++])))+" bytes\n");
         
-        a.append("@ sector " + String.valueOf(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i+=5]), Utils.hex(ar[i++]), Utils.hex(ar[i++]),"0","0","0","0"))+"\t ");
-        a.append(Utils.getSize(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]),"0","0","0","0"))+"\n");
-
+        
+            //increment by 32 to go to next file entry.
             j+=32;
             //System.out.println(String.format("%04X", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]))));
-            a.append("\n");
             }
         
 //        i = 0;
