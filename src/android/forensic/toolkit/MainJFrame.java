@@ -13,14 +13,14 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.filechooser.FileSystemView;
-import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
  * @author Resley Rodrigues
  */
-public class MainJFrame extends javax.swing.JFrame {
 
+public class MainJFrame extends javax.swing.JFrame {
+String jump_instruction = null, path=null;
     public void getDrives() {
 
         DriveSelector.removeAllItems();
@@ -31,24 +31,6 @@ public class MainJFrame extends javax.swing.JFrame {
         jTabbedPane1.setTitleAt(0, "Boot Sector");
         jTabbedPane1.setTitleAt(1, "FAT");
  //       jTabbedPane1.setTitleAt(2, "Boot Sector HEX View");
-    }
-
-    void addNode(DefaultMutableTreeNode top, String path) {
-        File temp = new File(path);
-        File[] children = temp.listFiles();
-        DefaultMutableTreeNode node;
-        for (File c : children) {
-            if (c.isHidden()) {
-                node = new DefaultMutableTreeNode(c.getName() + "   -hidden");
-            } else {
-                node = new DefaultMutableTreeNode(c.getName());
-            }
-            if (c.isDirectory()) {
-                addNode(node, c.getAbsolutePath());
-            }
-            top.add(node);
-            System.out.println(c.getName());
-        }
     }
 
     /**
@@ -91,7 +73,7 @@ public class MainJFrame extends javax.swing.JFrame {
         jButton8 = new javax.swing.JButton();
         DriveSelector = new javax.swing.JComboBox();
         lbl_SelectDrive = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
+        get_details = new javax.swing.JButton();
         VolumeLabel = new javax.swing.JLabel();
         FreeSpace = new javax.swing.JLabel();
         TotalSpace = new javax.swing.JLabel();
@@ -100,8 +82,6 @@ public class MainJFrame extends javax.swing.JFrame {
         lbl_FreeSpace = new javax.swing.JLabel();
         lbl_TotalSize = new javax.swing.JLabel();
         lbl_Type = new javax.swing.JLabel();
-        FileList = new javax.swing.JScrollPane();
-        FileListTree = new javax.swing.JTree();
         jTextField1 = new javax.swing.JTextField();
         RefreshDriveList = new javax.swing.JButton();
         lbl_Hash = new javax.swing.JLabel();
@@ -116,8 +96,12 @@ public class MainJFrame extends javax.swing.JFrame {
         PartitionTableData = new javax.swing.JTextArea();
         jInternalFrame1 = new javax.swing.JInternalFrame();
         jPanel1 = new javax.swing.JPanel();
-        jButton2 = new javax.swing.JButton();
-        jButton3 = new javax.swing.JButton();
+        clone_disk = new javax.swing.JButton();
+        hash_disk = new javax.swing.JButton();
+        jLayeredPane1 = new javax.swing.JLayeredPane();
+        re_calc = new javax.swing.JButton();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        fileListPane = new javax.swing.JEditorPane();
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
 
@@ -297,10 +281,10 @@ public class MainJFrame extends javax.swing.JFrame {
 
                     lbl_SelectDrive.setText("Select Drive");
 
-                    jButton1.setText("Get Details");
-                    jButton1.addActionListener(new java.awt.event.ActionListener() {
+                    get_details.setText("Get Details");
+                    get_details.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            jButton1ActionPerformed(evt);
+                            get_detailsActionPerformed(evt);
                         }
                     });
 
@@ -320,15 +304,6 @@ public class MainJFrame extends javax.swing.JFrame {
                     lbl_TotalSize.setText("Total Size:");
 
                     lbl_Type.setText("Type:");
-
-                    javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
-                    FileListTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
-                    FileListTree.addMouseListener(new java.awt.event.MouseAdapter() {
-                        public void mouseClicked(java.awt.event.MouseEvent evt) {
-                            FileListTreeMouseClicked(evt);
-                        }
-                    });
-                    FileList.setViewportView(FileListTree);
 
                     jTextField1.setText("jTextField1");
 
@@ -379,7 +354,7 @@ public class MainJFrame extends javax.swing.JFrame {
                     );
                     jInternalFrame1Layout.setVerticalGroup(
                         jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 195, Short.MAX_VALUE)
+                        .addGap(0, 218, Short.MAX_VALUE)
                     );
 
                     jTabbedPane1.addTab("tab3", jInternalFrame1);
@@ -392,30 +367,45 @@ public class MainJFrame extends javax.swing.JFrame {
                     );
                     jPanel1Layout.setVerticalGroup(
                         jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 225, Short.MAX_VALUE)
+                        .addGap(0, 248, Short.MAX_VALUE)
                     );
 
                     jTabbedPane1.addTab("tab4", jPanel1);
 
-                    jButton2.setText("Clone Disk");
-                    jButton2.addActionListener(new java.awt.event.ActionListener() {
+                    clone_disk.setText("Clone Disk");
+                    clone_disk.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            jButton2ActionPerformed(evt);
+                            clone_diskActionPerformed(evt);
                         }
                     });
 
-                    jButton3.setText("Compute Hash");
-                    jButton3.addActionListener(new java.awt.event.ActionListener() {
+                    hash_disk.setText("Compute Hash");
+                    hash_disk.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            jButton3ActionPerformed(evt);
+                            hash_diskActionPerformed(evt);
                         }
                     });
+
+                    re_calc.setText("Recalculate");
+                    re_calc.setToolTipText("Recalculate the list of files");
+                    re_calc.setName(""); // NOI18N
+                    re_calc.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            re_calcActionPerformed(evt);
+                        }
+                    });
+                    re_calc.setBounds(770, 20, 87, 23);
+                    jLayeredPane1.add(re_calc, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
+                    jScrollPane1.setViewportView(fileListPane);
+
+                    jScrollPane1.setBounds(0, 0, 980, 190);
+                    jLayeredPane1.add(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
                     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
                     getContentPane().setLayout(layout);
                     layout.setHorizontalGroup(
                         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(FileList)
                         .addGroup(layout.createSequentialGroup()
                             .addContainerGap()
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -437,13 +427,13 @@ public class MainJFrame extends javax.swing.JFrame {
                                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addComponent(VolumeLabel)
                                                 .addComponent(DriveType)
-                                                .addComponent(jButton1))
+                                                .addComponent(get_details))
                                             .addGap(87, 87, 87)
                                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addGroup(layout.createSequentialGroup()
-                                                    .addComponent(jButton2)
+                                                    .addComponent(clone_disk)
                                                     .addGap(18, 18, 18)
-                                                    .addComponent(jButton3))
+                                                    .addComponent(hash_disk))
                                                 .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGroup(layout.createSequentialGroup()
                                                     .addComponent(lbl_Hash)
@@ -451,6 +441,7 @@ public class MainJFrame extends javax.swing.JFrame {
                                                     .addComponent(Hash)))))))
                             .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLayeredPane1)
                     );
                     layout.setVerticalGroup(
                         layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -460,9 +451,9 @@ public class MainJFrame extends javax.swing.JFrame {
                             .addGap(1, 1, 1)
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jButton1)
-                                    .addComponent(jButton2)
-                                    .addComponent(jButton3))
+                                    .addComponent(get_details)
+                                    .addComponent(clone_disk)
+                                    .addComponent(hash_disk))
                                 .addComponent(RefreshDriveList, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(DriveSelector, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -489,10 +480,10 @@ public class MainJFrame extends javax.swing.JFrame {
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(lbl_Hash)
                                         .addComponent(Hash))))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addComponent(FileList, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(18, 18, 18)
-                            .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 253, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addContainerGap())
                     );
 
@@ -502,28 +493,20 @@ public class MainJFrame extends javax.swing.JFrame {
                     pack();
                 }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        String path, freeSpace, totalSpace;
+    private void get_detailsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_get_detailsActionPerformed
+        String freeSpace, totalSpace;
         path = DriveSelector.getSelectedItem().toString();
         File temp = new File(path);
 
         freeSpace = Utils.getSize(temp.getFreeSpace());
         totalSpace = Utils.getSize(temp.getTotalSpace());
 
-               VolumeLabel.setText(FileSystemView.getFileSystemView().getSystemDisplayName(temp));
+        VolumeLabel.setText(FileSystemView.getFileSystemView().getSystemDisplayName(temp));
         DriveType.setText(FileSystemView.getFileSystemView().getSystemTypeDescription(temp));
         FreeSpace.setText(freeSpace);
 //        TotalSpace.setText(totalSpace);
-        FileListTree.removeAll();
-        FileListTree.repaint();
 
-//
-//        DefaultMutableTreeNode top = new DefaultMutableTreeNode(path);
-//
-//               addNode(top,path);
-//         FileListTree.setModel(new DefaultTreeModel(top));
-//         FileListTree.repaint();
-         File diskRoot = new File("\\\\.\\" + path);
+        File diskRoot = new File("\\\\.\\" + path);
         RandomAccessFile diskAccess;
         try {
             MessageDigest md = MessageDigest.getInstance("MD5");
@@ -544,7 +527,7 @@ public class MainJFrame extends javax.swing.JFrame {
             BootSectorData.setTabSize(3);
             PartitionTableData.setTabSize(3);
             BootSectorHexData.setTabSize(3);
-            String jump_instruction = Utils.hex(content[0]) + Utils.hex(content[1]) + Utils.hex(content[2]);
+            jump_instruction = Utils.hex(content[0]) + Utils.hex(content[1]) + Utils.hex(content[2]);
             int txm;
             switch (jump_instruction) {
                 case "EB5290":
@@ -563,7 +546,7 @@ public class MainJFrame extends javax.swing.JFrame {
                         jTabbedPane1.setTitleAt(1, "FAT");
                         disk.getBPB(path);
                         disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData);
+                        disk.readFAT(PartitionTableData, fileListPane,false);
                         VolumeLabel.setText(disk.label);
                         jTextField1.setText(disk.type);
                         if(disk.total_sectors==0)
@@ -654,23 +637,19 @@ public class MainJFrame extends javax.swing.JFrame {
         } catch (Exception ex) {
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_get_detailsActionPerformed
 
     private void RefreshDriveListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RefreshDriveListActionPerformed
         this.getDrives();
     }//GEN-LAST:event_RefreshDriveListActionPerformed
 
-    private void FileListTreeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_FileListTreeMouseClicked
-        System.out.println(FileListTree.getLastSelectedPathComponent().toString().replace(',', '\\'));
-    }//GEN-LAST:event_FileListTreeMouseClicked
-
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
 
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void clone_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clone_diskActionPerformed
         cloneDialog.setVisible(true);
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_clone_diskActionPerformed
 
     private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
         // TODO add your handling code here:
@@ -684,13 +663,47 @@ public class MainJFrame extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton8ActionPerformed
 
-    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+    private void hash_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hash_diskActionPerformed
 hashDialog.setVisible(true);        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton3ActionPerformed
+    }//GEN-LAST:event_hash_diskActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
+    private void re_calcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_re_calcActionPerformed
+        try {
+            switch (jump_instruction) {
+                case "EB5290":
+                    {
+                        NTFS disk = new NTFS();
+                        jTabbedPane1.setTitleAt(1, "MFT");
+                        disk.getBPB(path);
+                        disk.printBPB(BootSectorData,BootSectorHexData);
+                        disk.readMFT(PartitionTableData);
+                        TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector * disk.total_sectors));
+                        break;
+                    }
+                case "EB5890":
+                    {
+                        FAT32 disk = new FAT32();
+                        jTabbedPane1.setTitleAt(1, "FAT");
+                        disk.getBPB(path);
+                        disk.printBPB(BootSectorData,BootSectorHexData);
+                        disk.readFAT(PartitionTableData, fileListPane,true);
+                        VolumeLabel.setText(disk.label);
+                        jTextField1.setText(disk.type);
+                        if(disk.total_sectors==0)
+                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectorsL));
+                        else
+                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectors));
+                        break;
+                    }
+                default:
+                    break;
+        }
+            re_calc.setVisible(false);
+        } catch (IOException ex) {
+                Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+    }//GEN-LAST:event_re_calcActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -720,6 +733,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
             public void run() {
                 MainJFrame a = new MainJFrame();
                 a.setVisible(true);
+                re_calc.setVisible(false);
                 a.getDrives();
 
             }
@@ -732,8 +746,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JTextArea BootSectorHexData;
     private javax.swing.JComboBox DriveSelector;
     private javax.swing.JLabel DriveType;
-    private javax.swing.JScrollPane FileList;
-    private javax.swing.JTree FileListTree;
     private javax.swing.JLabel FreeSpace;
     private javax.swing.JLabel Hash;
     private javax.swing.JScrollPane PartitionTable;
@@ -742,10 +754,11 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel TotalSpace;
     private javax.swing.JLabel VolumeLabel;
     private javax.swing.JDialog cloneDialog;
+    private javax.swing.JButton clone_disk;
+    private javax.swing.JEditorPane fileListPane;
+    private javax.swing.JButton get_details;
     private javax.swing.JDialog hashDialog;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
-    private javax.swing.JButton jButton3;
+    private javax.swing.JButton hash_disk;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
@@ -760,11 +773,13 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLayeredPane jLayeredPane1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
+    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField1;
@@ -777,5 +792,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel lbl_SelectDrive;
     private javax.swing.JLabel lbl_TotalSize;
     private javax.swing.JLabel lbl_Type;
+    public static javax.swing.JButton re_calc;
     // End of variables declaration//GEN-END:variables
 }
