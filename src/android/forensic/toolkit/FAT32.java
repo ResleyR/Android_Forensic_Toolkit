@@ -4,18 +4,31 @@
  */
 package android.forensic.toolkit;
 
-import java.io.BufferedReader;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
-import javax.swing.text.Document;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
 
 /**
  *
@@ -50,13 +63,20 @@ public class FAT32 extends FAT12 {
     private JFrame win;
     long first_data_sector;
     //Additional variables
-    String src_file = "res/file.png";
-    String deleted_file = "res/deleted_file.png";
-    String folder = "res/folder.png";
-    String deleted_folder = "res/deleted_folder.png";
+    private static final String src_file = "/res/file.png";
+    private static final String deleted_file = "/res/deleted_file.png";
+    private static final String folder = "/res/folder.png";
+    private static final String deleted_folder = "/res/deleted_folder.png";
+    private static final String hidden_file = "/res/hidden_file.png";
+    private static final String hidden_deleted_file = "/res/deleted_hidden_file.png";
+    private static final String hidden_folder = "/res/hidden_folder.png";
+    private static final String hidden_deleted_folder = "/res/deleted_hidden_folder.png";
     String title = "";
     String body = "";
     Boolean deleted = null;
+    String Image = "";
+    ArrayList <FileRecord> files = new ArrayList<>();
+        
 
     @Override
     public void getBPB(String path) throws FileNotFoundException, IOException {
@@ -133,237 +153,355 @@ public class FAT32 extends FAT12 {
     }
 
     private String checkIfDeleted(int attribute) {
-        String attrib = "<td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+//        String attrib = "<td align='left'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+//        System.out.println("Attribute in checkIfDeleted: "+attribute);
+        String attrib = "";
         switch (attribute) {
             case 0x01:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("R");     // READ ONLY
+                Image = ((deleted) ? deleted_file : src_file);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+                attrib = attrib.concat("R  ");     // READ ONLY
                 break;
             case 0x02:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("&nbsp;H");    // HIDDEN
+                Image = ((deleted) ? hidden_deleted_file : hidden_file);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_file : hidden_file) + "' />");
+                attrib = attrib.concat(" H ");    // HIDDEN
                 break;
             case 0x03:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("RH");    // READ ONLY & HIDDEN
+                Image = ((deleted) ? hidden_deleted_file : hidden_file);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_file : hidden_file) + "' />");
+                attrib = attrib.concat("RH ");    // READ ONLY & HIDDEN
                 break;
             case 0x04:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("&nbsp;&nbsp;S");    // SYSTEM
+                Image = ((deleted) ? deleted_file : src_file);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+                attrib = attrib.concat("  S");    // SYSTEM
                 break;
             case 0x05:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("R&nbsp;S");    // READ ONLY & SYSTEM
+                Image = ((deleted) ? deleted_file : src_file);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+                attrib = attrib.concat("R S");    // READ ONLY & SYSTEM
                 break;
             case 0x06:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
-                attrib = attrib.concat("&nbsp;HS");    // HIDDEN & SYSTEM
+                Image = ((deleted) ? hidden_deleted_file : hidden_file);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_file : hidden_file) + "' />");
+                attrib = attrib.concat(" HS");    // HIDDEN & SYSTEM
                 break;
             case 0x07:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+                Image = ((deleted) ? hidden_deleted_file : hidden_file);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_file : hidden_file) + "' />");
                 attrib = attrib.concat("RHS");    // READ ONLY, HIDDEN & SYSTEM
                 break;
             case 0x10:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                Image = ((deleted) ? deleted_folder : folder);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
 //              DIRECTORY
                 break;
             case 0x11:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
-                attrib = attrib.concat("R");     // READ ONLY DIRECTORY
+                Image = ((deleted) ? deleted_folder : folder);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                attrib = attrib.concat("R  ");     // READ ONLY DIRECTORY
                 break;
             case 0x12:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                Image = ((deleted) ? hidden_deleted_folder : hidden_folder);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_folder : hidden_folder) + "' />");
                 attrib = attrib.concat("&nbsp;H");    // HIDDEN DIRECTORY
                 break;
             case 0x13:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                Image = ((deleted) ? hidden_deleted_folder : hidden_folder);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_folder : hidden_folder) + "' />");
                 attrib = attrib.concat("RH");    // READ ONLY & HIDDEN DIRECTORY
                 break;
             case 0x14:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
-                attrib = attrib.concat("&nbsp;&nbsp;S");    // SYSTEM DIRECTORY
+                Image = ((deleted) ? deleted_folder : folder);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                attrib = attrib.concat("  S");    // SYSTEM DIRECTORY
                 break;
             case 0x15:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
-                attrib = attrib.concat("R&nbsp;S");    // READ ONLY & SYSTEM DIRECTORY
+                Image = ((deleted) ? deleted_folder : folder);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                attrib = attrib.concat("R S");    // READ ONLY & SYSTEM DIRECTORY
                 break;
             case 0x16:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
-                attrib = attrib.concat("&nbsp;HS");    // HIDDEN & SYSTEM DIRECTORY
+                Image = ((deleted) ? hidden_deleted_folder : hidden_folder);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_folder : hidden_folder) + "' />");
+                attrib = attrib.concat(" HS");    // HIDDEN & SYSTEM DIRECTORY
                 break;
             case 0x17:
-                body = body.concat("<img src='" + ((deleted) ? deleted_folder : folder) + "' />");
+                Image = ((deleted) ? hidden_deleted_folder : hidden_folder);
+//                body = body.concat("<img src='" + ((deleted) ? hidden_deleted_folder : hidden_folder) + "' />");
                 attrib = attrib.concat("RHS");    // READ ONLY, HIDDEN & SYSTEM DIRECTORY
                 break;
-            default:
-                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+            default:  //also case 0x20 ARCHIEVE
+                Image = ((deleted) ? deleted_file : src_file);
+//                body = body.concat("<img src='" + ((deleted) ? deleted_file : src_file) + "' />");
+                attrib = attrib.concat("   ");
                 break;
 
         }
-        attrib = attrib.concat("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>");
+//        attrib = attrib.concat("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>");
         return attrib;
     }
 
-    private void recalulate(javax.swing.JTextArea a, byte ar[]) {
-        FileWriter fWriter = null;
-            BufferedWriter writer = null;
-            try {
-                StringBuilder contentBuilder = new StringBuilder();
-                try {
-                    try (BufferedReader in = new BufferedReader(new FileReader("src/res/cache_template.html"))) {
-                        String str;
-                        while ((str = in.readLine()) != null) {
-                            contentBuilder.append(str);
-                        }
-                    }
-                } catch (IOException ey) {
-                }
-                String htmlString = contentBuilder.toString();
-                File file = new File("src/cache/" + title + ".html");
-                file.getParentFile().mkdirs();
-                fWriter = new FileWriter(file);
-                writer = new BufferedWriter(fWriter);
+    private void recalulate(javax.swing.JTextArea a, byte ar[]) throws JAXBException {
+//        FileWriter fWriter = null;
+//        BufferedWriter writer = null;
+        try {
+//                StringBuilder contentBuilder = new StringBuilder();
+//                try {
+//                    try (BufferedReader in = new BufferedReader(new FileReader("src/res/cache_template.html"))) {
+//                        String str;
+//                        while ((str = in.readLine()) != null) {
+//                            contentBuilder.append(str);
+//                        }
+//                    }
+//                } catch (IOException ey) {
+//                }
+//                String htmlString = contentBuilder.toString();
+//            File file = new File("src/cache/" + title + ".html");
+//            file.getParentFile().mkdirs();
+//            fWriter = new FileWriter(file);
+//            writer = new BufferedWriter(fWriter);
 
 
-                int j = 0;
-                int old_j = 0, new_j;
-                filelister:
-                while (j < 7168) {
-                    System.out.println(j);
-                    int attribute = Utils.hexToInt(Utils.hex(ar[i = j + 11]), "0");    //Byte 11 attribute
-                    
-                    switch (attribute) {
-                        case 0x0F:
+            int j = 0;
+            int old_j = 0, new_j;
+            filelister:
+            while (j < 7168) {
+                FileRecord fileRec = new FileRecord();
+                String name="", size="";
+                long startSector;
+//                System.out.println(j);
+                int attribute = Utils.hexToInt(Utils.hex(ar[i = j + 11]), "0");    //Byte 11 attribute
+//                System.out.println("Attribute in recalc: "+attribute);
+                switch (attribute) {
+                    case 0x0F:
 //               LongFileName
-                            j += 32;
-                            System.out.println("Skipped: " + j);
-                            continue filelister;
-                        default:   
-                             String attrib;
-                            body = body.concat("<tr>");
-                            if (Utils.hexToInt(Utils.hex(ar[j]), "0") == 0xE5) {
-                                body = body.concat("<td align='left' style='color:red;'>");
-                                deleted = true;
-                            } else {
-                                body = body.concat("<td align='left' style='color:black;'>");
-                                deleted = false;
-                            }
-                            switch (Utils.hexToInt(Utils.hex(ar[j + 6]), "0")) {
-                                case 0x7E:
-                                    new_j = j;
-                                    j -= 32;
+                        j += 32;
+//                        System.out.println("Skipped: " + j);
+                        continue filelister;
+                    default:
+                        String attrib;
+//                        body = body.concat("<file>");
+                        if (Utils.hexToInt(Utils.hex(ar[j]), "0") == 0xE5) {
+//                                body = body.concat("<td align='left' style='color:red;'>");
+//                            body = body.concat("<name>");
+                            deleted = true;
+                        } else {
+//                                body = body.concat("<td align='left' style='color:black;'>");
+//                            body = body.concat("<name>");
+                            deleted = false;
+                        }
+                        switch (Utils.hexToInt(Utils.hex(ar[j + 6]), "0")) {
+                            case 0x7E:
+                                new_j = j;
+                                j -= 32;
 
 
 //                            a.append("DELETED\t");
-                                    
-                                   attrib = checkIfDeleted(attribute);
-                                    String temp;
-                                    while (j > old_j) {
-                                        for (i = j + 2; i <= (j + 10); i += 3) {
-                                            temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
-                                            System.out.print(temp+"  ");
-                                            if (temp.equals("\uFFFF")) {
-                                                break;
-                                            }
-                                            body = body.concat(temp);
+
+                                attrib = checkIfDeleted(attribute);
+                                String temp;
+                                while (j > old_j) {
+                                    for (i = j + 2; i <= (j + 10); i += 3) {
+                                        temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
+//                                        System.out.print(temp + "  ");
+                                        if ((temp.equals("\u0000"))||(temp.equals("\uFFFF"))) {
+                                            break;
                                         }
-                                        for (i = j + 15; i <= (j + 25); i += 3) {
-                                            temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
-                                            System.out.print(temp+"  ");
-                                            if (temp.equals("\uFFFF")) {
-                                                break;
-                                            }
-                                            body = body.concat(temp);
-                                        }
-                                        for (i = j + 29; i <= (j + 31); i += 3) {
-                                            temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
-                                            System.out.print(temp+"  ");
-                                            if (temp.equals("\uFFFF")) {
-                                                break;
-                                            }
-                                            body = body.concat(temp);
-                                        }
-                                        j -= 32;
+                                        name = name.concat(temp);
+//                                        body = body.concat(temp);
                                     }
-                                    j = new_j;
-                                    body = body.concat("</td>");
-                                    break;
-                                default:
-                                    attrib = checkIfDeleted(attribute);
-                                    for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
-                                    {
-                                        body = body.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+                                    for (i = j + 15; i <= (j + 25); i += 3) {
+                                        temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
+//                                        System.out.print(temp + "  ");
+                                        if ((temp.equals("\u0000"))||(temp.equals("\uFFFF"))) {
+                                            break;
+                                        }
+                                        name = name.concat(temp);
+//                                        body = body.concat(temp);
+                                    }
+                                    for (i = j + 29; i <= (j + 31); i += 3) {
+                                        temp = String.valueOf(Utils.hexToText(Utils.hex(ar[i]) + Utils.hex(ar[--i])));
+//                                        System.out.print(temp + "  ");
+                                        if ((temp.equals("\u0000"))||(temp.equals("\uFFFF"))) {
+                                            break;
+                                        }
+                                        name = name.concat(temp);
+//                                        body = body.concat(temp);
+                                    }
+                                    j -= 32;
+                                
+                                }
+                                j = new_j;
+//                                    body = body.concat("</td>");
+//                                System.out.println("");
+                                break;
+                            default:
+                                attrib = checkIfDeleted(attribute);
+                                for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
+                                {
+                                    name = name.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+//                                    body = body.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
 //                            a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                                    }
-                                    break;
-                            }
-                            body = body.concat(attrib);
-                            i = j + 20;           //Byte 20-21 starting sector high order 
-                            //Byte 26-27 starting sector low  order 
-                            a.append("@ sector " + String.format("%04X\t", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0")));
-                            //Bytes 28-31 file size
-                            body = body.concat("<td align='left'>" + Utils.getSize(Utils.hexToInt(Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), "0", "0", "0", "0")) + "</td>");
-                            //a.append(Utils.getSize(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), "0", "0", "0", "0")) + "\n");
-                            old_j = j;
-                            break;
+                                }
+                                break;
+                        }
+//                        body = body.concat("</name>");
+                              
+//                        body = body.concat(attrib);
+                        i = j + 20;           //Byte 20-21 starting sector high order 
+                        //Byte 26-27 starting sector low  order 
+//                            a.append("@ sector " + String.format("%04X\t", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0")));
+                 startSector = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0");
+                        //      body = body.concat("<sector>" + String.format("%04X\t", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0")) + "</sector>");
+                        //Bytes 28-31 file size
+//                            body = body.concat("<td align='left'>" + Utils.getSize(Utils.hexToInt(Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), "0", "0", "0", "0")) + "</td>");
+                        size = size.concat(Utils.getSize(Utils.hexToInt(Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), "0", "0", "0", "0")));
+                  //      body = body.concat("<size>" + Utils.getSize(Utils.hexToInt(Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), Utils.hex(ar[++i]), "0", "0", "0", "0")) + "</size>");
+                        //a.append(Utils.getSize(Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), "0", "0", "0", "0")) + "\n");
+                        old_j = j;
+                        fileRec.setName(name);
+                        fileRec.setAttributes(attrib);
+                        fileRec.setStartSector(startSector);
+                        fileRec.setImage(Image);
+                        fileRec.setFileSize(size);
+                        fileRec.setFoundAt(j);
+                        files.add(fileRec);
+                        
+                        break;
 
 
 
-                        case 0x08:
-                            body = body.concat("<tr>");
-                            body = body.concat("<td align='left' colspan='3'><b>");
-                            for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
-                            {
-                                body = body.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                            }
-                            //a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                            body = body.concat("&#09; VOLUME ID</b></td>");
-                            //a.append("\t VOLUME ID\n");
-                            break;
-                    }
-                    //increment by 32 to go to next file entry.
-                    j += 32;
-                    body = body.concat("</tr>");
+                    case 0x08:
+//                            body = body.concat("<tr>");
+//                            body = body.concat("<td align='left' colspan='3'><b>");
+//                            for (i = j; i <= (j + 10); i++) //Byte 0-10 filename
+//                            {
+//                                body = body.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+//                            }
+                        //a.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+//                            body = body.concat("&#09; VOLUME ID</b></td>");
+                        //a.append("\t VOLUME ID\n");
+                        break;
                 }
-                body = body.concat("</table>");
-
-                htmlString = htmlString.replace("$title", title);
-                htmlString = htmlString.replace("$body", body);
-                writer.write(htmlString);
-                writer.newLine(); //this is not actually needed for html files - can make your code more readable though 
-                writer.close(); //make sure you close the writer object 
+                //increment by 32 to go to next file entry.
+                j += 32;
+//                    body = body.concat("</tr>");
                 
-            } catch (Exception ex) {
-                Logger.getLogger(FAT32.class.getName()).log(Level.SEVERE, null, ex);
-                System.err.println("Exception Occured");
+                
+//                body = body.concat("</file>");
             }
-    }
-    
-    public void readFAT(javax.swing.JTextArea a, javax.swing.JEditorPane e, Boolean forceReCalc) throws IOException {
-        byte[] ar;
+//                body = body.concat("</table>");
+//            body = body.concat("</filelist>");
 
+            // htmlString = htmlString.replace("$title", title);
+            //  htmlString = htmlString.replace("$body", body);
+//            a.appen d(body);
+//            writer.write(body);
+//            writer.close(); //make sure you close the writer object 
+
+        } catch (Exception ex) {
+            Logger.getLogger(FAT32.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Exception Occured");
+        }
+        
+        FileList filelist = new FileList();
+        filelist.setFile(files);
+         // create JAXB context and instantiate marshaller
+    JAXBContext context = JAXBContext.newInstance(FileList.class);
+    Marshaller m = context.createMarshaller();
+    //m.setProperty("jaxb.encoding", "UTF-16");
+    m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+
+    // Write to System.out
+   // m.marshal(filelist, System.out);
+
+    // Write to File
+    m.marshal(filelist, new File("src/cache/" + title + ".xml"));
+    }
+
+    public void readFAT(javax.swing.JTextArea a, javax.swing.JEditorPane e,javax.swing.JList list, Boolean forceReCalc) throws IOException, JAXBException {
+        byte[] ar;
+        
+        
+        
         first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FATL);
         ar = new byte[((int) sectors_per_FATL) * bytes_per_Sector];//16*16*100];
         Arrays.fill(ar, (byte) 0);
         int jumpto = (int) (first_cluster - 2 + first_data_sector) * bytes_per_Sector;
         address = reserved_sectors * bytes_per_Sector;
         diskAccess.seek(jumpto);
-        System.out.println(diskAccess.getFilePointer());
+//        System.out.println(diskAccess.getFilePointer());
         diskAccess.read(ar);
 
         title = "" + serial_number;
-        body = "<table style='border-spacing: 10px 0;'>";
-        File cachedFile = new File("src/cache/" + title + ".html");
+//        body = "<table style='border-spacing: 10px 0;'>";
+        body = "<?xml version=\"1.0\" encoding=\"UTF-16\"?><filelist>";
+//        File cachedFile = new File("src/cache/" + title + ".html");
+        File cachedFile = new File("src/cache/" + title + ".xml");
         e.setEditable(false);
-        e.setContentType("text/html");
-        if (cachedFile.exists()&&!forceReCalc) {
-            e.setPage("file:///" + cachedFile.getAbsoluteFile());
+        e.setContentType("text/xml");
+        if (cachedFile.exists() && !forceReCalc) {
+//            e.setPage("file:///" + cachedFile.getAbsoluteFile());
+            JAXBContext context = JAXBContext.newInstance(FileList.class);
+            Unmarshaller um = context.createUnmarshaller();
+            //um.setProperty("jaxb.encoding", "UTF-16");
+            FileList filesList = (FileList) um.unmarshal(new FileReader("src/cache/" + title + ".xml"));
+            if(filesList!=null)
+                System.out.println("Unmarshalled");
+            else
+                System.err.println("Error in unmarshallling");
+    ArrayList<FileRecord> arr_list = filesList.getFile();
+    for (FileRecord file : arr_list) {
+      System.out.println("" + file.getName() + "\t" + file.getAttributes() + "\t" + file.getFileSize());
+    }
             MainJFrame.re_calc.setVisible(true);
- } else {
+        } else {
             recalulate(a, ar);
-            Document doc = e.getDocument();
-            doc.putProperty(Document.StreamDescriptionProperty, null);
-            e.setPage("file:///" + cachedFile.getAbsoluteFile());
+            Vector vector = new Vector();
+            DefaultListModel l1 = new DefaultListModel();
+            for(FileRecord file:files){
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                
+               java.net.URL imgUrl = getClass().getResource(file.img);
+                System.out.println(file.name+"\t\t"+file.filesize);
+               if (imgUrl != null) {
+//                   System.out.println("Found "+imgUrl);
+                panel.add(new JLabel(new ImageIcon(imgUrl)));
+                
+               }
+               else{
+//                   System.out.println("  ERROR  couldn't find "+file.img);
+               }
+//                panel.add(new JLabel(file.name+"   "+file.filesize, new ImageIcon(file.img), FlowLayout.LEFT));
+                panel.add(new JLabel(file.name+"   "+file.filesize));
+                vector.addElement(panel);
+                l1.addElement(panel);
+            }
+            list.setModel(l1);
+            list.setEnabled(true);
+            list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+           // list.setAlignmentY((float) 5.0);
+            //list.setListData(vector);
+            //list = new JList(files.toArray());
+            list.setVisibleRowCount(10);
+        list.setCellRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent
+    (JList list, Object value, int index, 
+     boolean isSelected,boolean cellHasFocus) {
+     Component component = (Component)value;
+     return component;
+     }
+        }  );
+
+
+            
+                        System.out.println(body);
+//            Document doc = e.getDocument();
+//            doc.putProperty(Document.StreamDescriptionProperty, null);
+//            e.setPage("file:///" + cachedFile.getAbsoluteFile());
         }
     }
 }

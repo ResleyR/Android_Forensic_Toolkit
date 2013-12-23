@@ -13,6 +13,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.filechooser.FileSystemView;
+import javax.xml.bind.JAXBException;
 
 /**
  *
@@ -96,6 +97,8 @@ String jump_instruction = null, path=null;
         PartitionTableData = new javax.swing.JTextArea();
         jInternalFrame1 = new javax.swing.JInternalFrame();
         jPanel1 = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jList1 = new javax.swing.JList();
         clone_disk = new javax.swing.JButton();
         hash_disk = new javax.swing.JButton();
         jLayeredPane1 = new javax.swing.JLayeredPane();
@@ -372,6 +375,10 @@ String jump_instruction = null, path=null;
 
                     jTabbedPane1.addTab("tab4", jPanel1);
 
+                    jScrollPane2.setViewportView(jList1);
+
+                    jTabbedPane1.addTab("tab5", jScrollPane2);
+
                     clone_disk.setText("Clone Disk");
                     clone_disk.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -546,7 +553,7 @@ String jump_instruction = null, path=null;
                         jTabbedPane1.setTitleAt(1, "FAT");
                         disk.getBPB(path);
                         disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileListPane,false);
+                        disk.readFAT(PartitionTableData, fileListPane, jList1, false);
                         VolumeLabel.setText(disk.label);
                         jTextField1.setText(disk.type);
                         if(disk.total_sectors==0)
@@ -686,7 +693,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                         jTabbedPane1.setTitleAt(1, "FAT");
                         disk.getBPB(path);
                         disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileListPane,true);
+                        disk.readFAT(PartitionTableData, fileListPane, jList1, true);
                         VolumeLabel.setText(disk.label);
                         jTextField1.setText(disk.type);
                         if(disk.total_sectors==0)
@@ -699,7 +706,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                     break;
         }
             re_calc.setVisible(false);
-        } catch (IOException ex) {
+        } catch (IOException | JAXBException ex) {
                 Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
     }//GEN-LAST:event_re_calcActionPerformed
@@ -774,12 +781,14 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLayeredPane jLayeredPane1;
+    private javax.swing.JList jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTextField jTextField1;
