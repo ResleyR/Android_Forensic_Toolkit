@@ -97,14 +97,15 @@ String jump_instruction = null, path=null;
         PartitionTableData = new javax.swing.JTextArea();
         jInternalFrame1 = new javax.swing.JInternalFrame();
         jPanel1 = new javax.swing.JPanel();
-        jScrollPane2 = new javax.swing.JScrollPane();
+        jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList();
         clone_disk = new javax.swing.JButton();
         hash_disk = new javax.swing.JButton();
         jLayeredPane1 = new javax.swing.JLayeredPane();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        fileList = new javax.swing.JList();
         re_calc = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        fileListPane = new javax.swing.JEditorPane();
+        recoverFiles = new javax.swing.JButton();
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
 
@@ -357,27 +358,36 @@ String jump_instruction = null, path=null;
                     );
                     jInternalFrame1Layout.setVerticalGroup(
                         jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 218, Short.MAX_VALUE)
+                        .addGap(0, 260, Short.MAX_VALUE)
                     );
 
                     jTabbedPane1.addTab("tab3", jInternalFrame1);
+
+                    jList1.setModel(new javax.swing.AbstractListModel() {
+                        String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
+                        public int getSize() { return strings.length; }
+                        public Object getElementAt(int i) { return strings[i]; }
+                    });
+                    jScrollPane1.setViewportView(jList1);
 
                     javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
                     jPanel1.setLayout(jPanel1Layout);
                     jPanel1Layout.setHorizontalGroup(
                         jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 978, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                            .addContainerGap(377, Short.MAX_VALUE)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(357, 357, 357))
                     );
                     jPanel1Layout.setVerticalGroup(
                         jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 248, Short.MAX_VALUE)
+                        .addGroup(jPanel1Layout.createSequentialGroup()
+                            .addContainerGap()
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addContainerGap(149, Short.MAX_VALUE))
                     );
 
                     jTabbedPane1.addTab("tab4", jPanel1);
-
-                    jScrollPane2.setViewportView(jList1);
-
-                    jTabbedPane1.addTab("tab5", jScrollPane2);
 
                     clone_disk.setText("Clone Disk");
                     clone_disk.addActionListener(new java.awt.event.ActionListener() {
@@ -393,6 +403,16 @@ String jump_instruction = null, path=null;
                         }
                     });
 
+                    fileList.setModel(new javax.swing.AbstractListModel() {
+                        String[] strings = { "Please select a drive from the dropdown box and click Get Details to list the files on that drive." };
+                        public int getSize() { return strings.length; }
+                        public Object getElementAt(int i) { return strings[i]; }
+                    });
+                    jScrollPane2.setViewportView(fileList);
+
+                    jScrollPane2.setBounds(0, 8, 978, 190);
+                    jLayeredPane1.add(jScrollPane2, javax.swing.JLayeredPane.DEFAULT_LAYER);
+
                     re_calc.setText("Recalculate");
                     re_calc.setToolTipText("Recalculate the list of files");
                     re_calc.setName(""); // NOI18N
@@ -401,13 +421,14 @@ String jump_instruction = null, path=null;
                             re_calcActionPerformed(evt);
                         }
                     });
-                    re_calc.setBounds(770, 20, 87, 23);
-                    jLayeredPane1.add(re_calc, javax.swing.JLayeredPane.DEFAULT_LAYER);
 
-                    jScrollPane1.setViewportView(fileListPane);
-
-                    jScrollPane1.setBounds(0, 0, 980, 190);
-                    jLayeredPane1.add(jScrollPane1, javax.swing.JLayeredPane.DEFAULT_LAYER);
+                    recoverFiles.setText("Recover");
+                    recoverFiles.setToolTipText("Recover the selected files.");
+                    recoverFiles.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            recoverFilesActionPerformed(evt);
+                        }
+                    });
 
                     javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
                     getContentPane().setLayout(layout);
@@ -428,15 +449,19 @@ String jump_instruction = null, path=null;
                                     .addComponent(RefreshDriveList, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(TotalSpace)
                                         .addComponent(FreeSpace)
                                         .addGroup(layout.createSequentialGroup()
                                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                 .addComponent(VolumeLabel)
                                                 .addComponent(DriveType)
-                                                .addComponent(get_details))
+                                                .addComponent(get_details)
+                                                .addComponent(TotalSpace))
                                             .addGap(87, 87, 87)
                                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(layout.createSequentialGroup()
+                                                    .addComponent(re_calc)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addComponent(recoverFiles))
                                                 .addGroup(layout.createSequentialGroup()
                                                     .addComponent(clone_disk)
                                                     .addGap(18, 18, 18)
@@ -467,31 +492,34 @@ String jump_instruction = null, path=null;
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(layout.createSequentialGroup()
                                     .addComponent(lbl_Label)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(lbl_Type)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(lbl_FreeSpace)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_FreeSpace)
+                                        .addComponent(FreeSpace))
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(lbl_TotalSize, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_TotalSize, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(TotalSpace)))
                                 .addGroup(layout.createSequentialGroup()
                                     .addComponent(VolumeLabel)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addComponent(DriveType)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(FreeSpace)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(TotalSpace))
+                                    .addGap(26, 26, 26)
+                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(re_calc)
+                                        .addComponent(recoverFiles)))
                                 .addGroup(layout.createSequentialGroup()
                                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                         .addComponent(lbl_Hash)
                                         .addComponent(Hash))))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                            .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 276, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap())
+                            .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE))
                     );
 
                     VolumeLabel.getAccessibleContext().setAccessibleName("VolumeLabel");
@@ -553,7 +581,7 @@ String jump_instruction = null, path=null;
                         jTabbedPane1.setTitleAt(1, "FAT");
                         disk.getBPB(path);
                         disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileListPane, jList1, false);
+                        disk.readFAT(PartitionTableData, fileList, false);
                         VolumeLabel.setText(disk.label);
                         jTextField1.setText(disk.type);
                         if(disk.total_sectors==0)
@@ -636,7 +664,7 @@ String jump_instruction = null, path=null;
                     }
                     break;
             }
-
+recoverFiles.setVisible(true);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | NoSuchAlgorithmException ex) {
@@ -693,7 +721,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                         jTabbedPane1.setTitleAt(1, "FAT");
                         disk.getBPB(path);
                         disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileListPane, jList1, true);
+                        disk.readFAT(PartitionTableData, fileList, true);
                         VolumeLabel.setText(disk.label);
                         jTextField1.setText(disk.type);
                         if(disk.total_sectors==0)
@@ -706,10 +734,35 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                     break;
         }
             re_calc.setVisible(false);
+            recoverFiles.setVisible(true);
         } catch (IOException | JAXBException ex) {
                 Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
             }
     }//GEN-LAST:event_re_calcActionPerformed
+
+    private void recoverFilesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_recoverFilesActionPerformed
+        try {
+            switch (jump_instruction) {
+                case "EB5290":
+                    {//NTFS
+                        break;
+                    }
+                case "EB5890":
+                    {
+                        
+                        FAT32 disk = new FAT32();
+                        disk.recoverFiles(fileList, path);
+//                        disk.recoverFiles(jList1);
+                    }
+                default:
+                    break;
+        }
+            
+        } catch (Exception ex) {
+                Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+    }//GEN-LAST:event_recoverFilesActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -741,6 +794,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                 MainJFrame a = new MainJFrame();
                 a.setVisible(true);
                 re_calc.setVisible(false);
+                recoverFiles.setVisible(false);
                 a.getDrives();
 
             }
@@ -762,7 +816,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel VolumeLabel;
     private javax.swing.JDialog cloneDialog;
     private javax.swing.JButton clone_disk;
-    private javax.swing.JEditorPane fileListPane;
+    private javax.swing.JList fileList;
     private javax.swing.JButton get_details;
     private javax.swing.JDialog hashDialog;
     private javax.swing.JButton hash_disk;
@@ -802,5 +856,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JLabel lbl_TotalSize;
     private javax.swing.JLabel lbl_Type;
     public static javax.swing.JButton re_calc;
+    public static javax.swing.JButton recoverFiles;
     // End of variables declaration//GEN-END:variables
 }
