@@ -14,22 +14,22 @@ import java.io.RandomAccessFile;
  * @author Resley Rodrigues
  */
 public class NTFS {
-    String jump_instruction = "";
-    String file_system_ID = "";
-    int bytes_per_Sector;
-    int sectors_per_cluster;
-    int reserved_sectors;
-    String media_descriptor;
-    int sectors_per_track;
-    int number_of_heads;
-    int hidden_sectors;
-    long total_sectors;
-    long location_$MFT;
-    long location_$MFTMirr;
-    int clusters_per_file_segment;
-    int clusters_per_index_buffer;
-    int volume_serial_number;
-    int checksum;
+    String jump_instruction = "";       //0-2           0x00
+    String file_system_ID = "";         //3-10          0x03
+    int bytes_per_Sector;               //11-12         0x0B
+    int sectors_per_cluster;            //13            0x0D
+    int reserved_sectors;               //14-15         0x0E
+    String media_descriptor;            //21            0x13
+    int sectors_per_track;              //24-25         0x18
+    int number_of_heads;                //26-27         0x1A
+    int hidden_sectors;                 //28-31         0x1C
+    long total_sectors;                 //40-47         0x28
+    long location_$MFT;                 //48-55         0x30
+    long location_$MFTMirr;             //56-63         0x38
+    int clusters_per_file_segment;      //64-67         0x40
+    int clusters_per_index_buffer;      //68            0x44
+    int volume_serial_number;           //72-79         0x48         
+    int checksum;                       //80-81         0x50
     int i=0;
     RandomAccessFile diskAccess;
     byte[] content = new byte[512];
@@ -83,16 +83,17 @@ public class NTFS {
     }
     
     public void readMFT(javax.swing.JTextArea a) throws IOException {
-        MFT[] mft_header = new MFT[50];
-        MFT x = new MFT();
+        MFT[] mft_header = new MFT[200];
         System.out.println(diskAccess.getFilePointer());
-        diskAccess.seek(location_$MFT);//*bytes_per_Sector);
+        diskAccess.seek(location_$MFT*sectors_per_cluster*bytes_per_Sector);
         System.out.println("Max: "+total_sectors*bytes_per_Sector);
         System.out.println(diskAccess.getFilePointer());
         byte ar[] = new byte[1024];
+//        diskAccess.skipBytes(2048);
         i = 0;
         while(i < mft_header.length)
         {
+//            System.out.println("Offset: "+diskAccess.getFilePointer());
             mft_header[i] = new MFT();
             diskAccess.read(ar);
             mft_header[i].set_data(ar);
