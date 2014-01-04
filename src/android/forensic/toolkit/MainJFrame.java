@@ -8,12 +8,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.ButtonModel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.bind.JAXBException;
+import sun.rmi.log.ReliableLog;
 
 /**
  *
@@ -22,7 +28,7 @@ import javax.xml.bind.JAXBException;
 
 public class MainJFrame extends javax.swing.JFrame {
 String jump_instruction = null, path=null;
-    public void getDrives() {
+    public void getDrives(javax.swing.JComboBox DriveSelector) {
 
         DriveSelector.removeAllItems();
         File[] roots = File.listRoots();
@@ -59,9 +65,9 @@ String jump_instruction = null, path=null;
         jProgressBar1 = new javax.swing.JProgressBar();
         jButton5 = new javax.swing.JButton();
         hashDialog = new javax.swing.JDialog();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
-        jRadioButton3 = new javax.swing.JRadioButton();
+        MD5 = new javax.swing.JRadioButton();
+        SHA1 = new javax.swing.JRadioButton();
+        SHA512 = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox();
         jTextField3 = new javax.swing.JTextField();
@@ -70,8 +76,11 @@ String jump_instruction = null, path=null;
         jButton6 = new javax.swing.JButton();
         jButton7 = new javax.swing.JButton();
         jLabel6 = new javax.swing.JLabel();
-        jTextField4 = new javax.swing.JTextField();
-        jButton8 = new javax.swing.JButton();
+        HashValue = new javax.swing.JTextField();
+        ComputeHash = new javax.swing.JButton();
+        RefreshDriveList1 = new javax.swing.JButton();
+        HashAlgorithm = new javax.swing.ButtonGroup();
+        FileSaveAs = new javax.swing.JFileChooser();
         DriveSelector = new javax.swing.JComboBox();
         lbl_SelectDrive = new javax.swing.JLabel();
         get_details = new javax.swing.JButton();
@@ -107,7 +116,17 @@ String jump_instruction = null, path=null;
         re_calc = new javax.swing.JButton();
         recoverFiles = new javax.swing.JButton();
 
+        cloneDialog.setTitle("Clone Disk - Android Forensic Toolkit");
+        cloneDialog.setAlwaysOnTop(true);
+        cloneDialog.setBounds(new java.awt.Rectangle(0, 0, 300, 150));
+        cloneDialog.setResizable(false);
+
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
+            jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    jComboBox1ActionPerformed(evt);
+                }
+            });
 
             jLabel1.setText("Disk to Clone:");
 
@@ -116,8 +135,14 @@ String jump_instruction = null, path=null;
                 jLabel2.setText("Save to: ");
 
                 jButton4.setText("Browse");
+                jButton4.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jButton4ActionPerformed(evt);
+                    }
+                });
 
                 jProgressBar1.setValue(74);
+                jProgressBar1.setIndeterminate(true);
 
                 jButton5.setText("Cancel");
                 jButton5.addActionListener(new java.awt.event.ActionListener() {
@@ -165,19 +190,24 @@ String jump_instruction = null, path=null;
                             .addComponent(jButton4))
                         .addGap(18, 18, 18)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(22, Short.MAX_VALUE))
+                        .addContainerGap(32, Short.MAX_VALUE))
                 );
 
-                jRadioButton1.setText("MD5");
-                jRadioButton1.addActionListener(new java.awt.event.ActionListener() {
+                hashDialog.setTitle("Compute Hash - Android Forensic Toolkit");
+                hashDialog.setBounds(new java.awt.Rectangle(0, 0, 400, 240));
+                hashDialog.setPreferredSize(new java.awt.Dimension(400, 240));
+                hashDialog.setResizable(false);
+
+                MD5.setText("MD5");
+                MD5.addActionListener(new java.awt.event.ActionListener() {
                     public void actionPerformed(java.awt.event.ActionEvent evt) {
-                        jRadioButton1ActionPerformed(evt);
+                        MD5ActionPerformed(evt);
                     }
                 });
 
-                jRadioButton2.setText("SHA1");
+                SHA1.setText("SHA1");
 
-                jRadioButton3.setText("SHA2");
+                SHA512.setText("SHA512");
 
                 jLabel3.setText("Choose Algorithm:");
 
@@ -189,7 +219,7 @@ String jump_instruction = null, path=null;
 
                     jLabel5.setText("Disk to Hash:");
 
-                    jButton6.setText("Cancel");
+                    jButton6.setText("Hide");
                     jButton6.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
                             jButton6ActionPerformed(evt);
@@ -200,12 +230,24 @@ String jump_instruction = null, path=null;
 
                     jLabel6.setText("Hash Value:");
 
-                    jTextField4.setText("3DA3828BAC4918CAED8AA82F71");
+                    HashValue.setText("3DA3828BAC4918CAED8AA82F71");
 
-                    jButton8.setText("Compute");
-                    jButton8.addActionListener(new java.awt.event.ActionListener() {
+                    ComputeHash.setText("Compute");
+                    ComputeHash.addActionListener(new java.awt.event.ActionListener() {
                         public void actionPerformed(java.awt.event.ActionEvent evt) {
-                            jButton8ActionPerformed(evt);
+                            ComputeHashActionPerformed(evt);
+                        }
+                    });
+
+                    RefreshDriveList1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/android/forensic/toolkit/refresh.png"))); // NOI18N
+                    RefreshDriveList1.setToolTipText("Refresh");
+                    RefreshDriveList1.setBorder(null);
+                    RefreshDriveList1.setBorderPainted(false);
+                    RefreshDriveList1.setContentAreaFilled(false);
+                    RefreshDriveList1.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+                    RefreshDriveList1.addActionListener(new java.awt.event.ActionListener() {
+                        public void actionPerformed(java.awt.event.ActionEvent evt) {
+                            RefreshDriveList1ActionPerformed(evt);
                         }
                     });
 
@@ -221,61 +263,69 @@ String jump_instruction = null, path=null;
                                         .addGroup(hashDialogLayout.createSequentialGroup()
                                             .addComponent(jLabel3)
                                             .addGap(18, 18, 18)
-                                            .addComponent(jRadioButton1)
+                                            .addComponent(MD5)
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jRadioButton2)
+                                            .addComponent(SHA1)
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(jRadioButton3))
+                                            .addComponent(SHA512))
                                         .addGroup(hashDialogLayout.createSequentialGroup()
                                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, hashDialogLayout.createSequentialGroup()
                                                     .addComponent(jLabel5)
                                                     .addGap(18, 18, 18)
-                                                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addComponent(RefreshDriveList1, javax.swing.GroupLayout.PREFERRED_SIZE, 26, javax.swing.GroupLayout.PREFERRED_SIZE))
                                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, hashDialogLayout.createSequentialGroup()
                                                     .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                                         .addComponent(jLabel4)
                                                         .addComponent(jLabel6))
                                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                                     .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(HashValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                         .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))))
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                                .addComponent(jButton8)
+                                                .addComponent(ComputeHash)
                                                 .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                                 .addGroup(hashDialogLayout.createSequentialGroup()
-                                    .addGap(136, 136, 136)
+                                    .addGap(139, 139, 139)
                                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addContainerGap(52, Short.MAX_VALUE))
                     );
                     hashDialogLayout.setVerticalGroup(
                         hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(hashDialogLayout.createSequentialGroup()
                             .addGap(20, 20, 20)
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jRadioButton1)
-                                .addComponent(jRadioButton2)
-                                .addComponent(jRadioButton3)
+                                .addComponent(MD5)
+                                .addComponent(SHA1)
+                                .addComponent(SHA512)
                                 .addComponent(jLabel3))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                            .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel5)
-                                .addComponent(jButton8))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                            .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel5)
+                                    .addComponent(ComputeHash))
+                                .addComponent(RefreshDriveList1, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jLabel6)
-                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(HashValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGap(11, 11, 11)
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(jLabel4)
                                 .addComponent(jButton7))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                            .addGap(18, 18, 18)
                             .addComponent(jButton6)
-                            .addContainerGap())
+                            .addContainerGap(60, Short.MAX_VALUE))
                     );
+
+                    FileSaveAs.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+                    FileSaveAs.setFileFilter(new FileNameExtensionFilter("Disk Image (*.iso)", ".iso"));
+                    FileSaveAs.setFileSelectionMode(javax.swing.JFileChooser.FILES_AND_DIRECTORIES);
 
                     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
                     setTitle("Android Forensic Toolkit");
@@ -408,6 +458,7 @@ String jump_instruction = null, path=null;
                         public int getSize() { return strings.length; }
                         public Object getElementAt(int i) { return strings[i]; }
                     });
+                    fileList.setEnabled(false);
                     jScrollPane2.setViewportView(fileList);
 
                     jScrollPane2.setBounds(0, 8, 978, 190);
@@ -675,31 +726,27 @@ recoverFiles.setVisible(true);
     }//GEN-LAST:event_get_detailsActionPerformed
 
     private void RefreshDriveListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RefreshDriveListActionPerformed
-        this.getDrives();
+        this.getDrives(DriveSelector);
     }//GEN-LAST:event_RefreshDriveListActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+       cloneDialog.setVisible(false);
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void clone_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clone_diskActionPerformed
         cloneDialog.setVisible(true);
+        this.getDrives(jComboBox1);
     }//GEN-LAST:event_clone_diskActionPerformed
 
-    private void jRadioButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jRadioButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jRadioButton1ActionPerformed
-
-    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton6ActionPerformed
-
-    private void jButton8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton8ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton8ActionPerformed
-
     private void hash_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hash_diskActionPerformed
-hashDialog.setVisible(true);        // TODO add your handling code here:
+        this.getDrives(jComboBox2);
+        hashDialog.setVisible(true);
+        MD5.setActionCommand("MD5");
+        SHA1.setActionCommand("SHA1");
+        SHA512.setActionCommand("SHA512");
+        HashAlgorithm.add(MD5);
+        HashAlgorithm.add(SHA1);
+        HashAlgorithm.add(SHA512);
     }//GEN-LAST:event_hash_diskActionPerformed
 
     private void re_calcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_re_calcActionPerformed
@@ -764,6 +811,105 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
 
     }//GEN-LAST:event_recoverFilesActionPerformed
 
+    private void ComputeHashActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComputeHashActionPerformed
+        try {
+            File spath = new File(jComboBox2.getSelectedItem().toString());
+            long diskSize = spath.getTotalSpace();
+            System.out.println("Disk size: " + diskSize + " or " + Utils.getSize(diskSize));
+            System.out.println("Disk : "+spath.getAbsolutePath() + " or " + spath.getCanonicalPath());
+            MessageDigest m = null;
+            byte[] content = new byte[5242880];
+            ButtonModel algorithm = HashAlgorithm.getSelection();
+            String algo = algorithm.getActionCommand();
+            try {
+                m = MessageDigest.getInstance(algo);
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            File sxpath = new File("\\\\.\\" + jComboBox2.getSelectedItem().toString());
+            
+                RandomAccessFile diskAccess1 = new RandomAccessFile(sxpath, "r");
+            
+            m.reset();
+            StringBuilder hashString = new StringBuilder();
+            int stop = (int) (diskSize/5242880);
+            int extra = (int) (diskSize%5242880);
+            for(int i=0;i<=stop;i++)
+            {
+                System.out.println(i);
+                diskAccess1.readFully(content);
+            
+                m.update(content);
+                byte[] digest = m.digest(content);
+                BigInteger bigInt = new BigInteger(1,digest);
+                hashString = hashString.append(bigInt.toString(16));
+//                System.out.println(hashString);
+            }
+            content = new byte[extra];
+            m.update(content);
+                byte[] digest = m.digest(content);
+                BigInteger bigInt = new BigInteger(1,digest);
+                hashString = hashString.append(bigInt.toString(16));
+                
+                
+            m.update(String.valueOf(hashString).getBytes());
+            digest = m.digest(String.valueOf(hashString).getBytes());
+            bigInt = new BigInteger(1,digest);
+                HashValue.setText(bigInt.toString(16));
+        } catch (IOException ex) {
+            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_ComputeHashActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        hashDialog.setVisible(false);
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void MD5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_MD5ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_MD5ActionPerformed
+
+    private void RefreshDriveList1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_RefreshDriveList1ActionPerformed
+       this.getDrives(jComboBox2);
+    }//GEN-LAST:event_RefreshDriveList1ActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        int returnVal = FileSaveAs.showSaveDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File file = FileSaveAs.getSelectedFile();
+        try {
+          // What to do with the file, e.g. display it in a TextArea
+            System.out.println(file.getAbsolutePath());
+            RandomAccessFile t = new RandomAccessFile(file, "rw");
+            File src = new File(jComboBox1.getSelectedItem().toString());
+            RandomAccessFile s = new RandomAccessFile("\\\\.\\"+src, "r");
+            byte[] content = new byte[5242880];
+            long diskSize = src.getTotalSpace();
+            int stop = (int) (diskSize/5242880);
+            int extra = (int) (diskSize%5242880);
+            for(int i=0;i<=stop;i++)
+            {
+                System.out.println(i);
+                s.readFully(content);
+                t.write(content);
+            }
+            content = new byte[extra];
+            s.read(content);
+            t.write(content);
+                
+         // textarea.read( new FileReader( file.getAbsolutePath() ), null );
+        } catch (IOException ex) {
+          System.out.println("problem accessing file"+file.getAbsolutePath());
+        }
+    } else {
+        System.out.println("File access cancelled by user.");
+    }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -795,8 +941,7 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
                 a.setVisible(true);
                 re_calc.setVisible(false);
                 recoverFiles.setVisible(false);
-                a.getDrives();
-
+                a.getDrives(a.DriveSelector);
             }
         });
     }
@@ -805,13 +950,21 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JTextArea BootSectorData;
     private javax.swing.JScrollPane BootSectorHex;
     private javax.swing.JTextArea BootSectorHexData;
+    private javax.swing.JButton ComputeHash;
     private javax.swing.JComboBox DriveSelector;
     private javax.swing.JLabel DriveType;
+    private javax.swing.JFileChooser FileSaveAs;
     private javax.swing.JLabel FreeSpace;
     private javax.swing.JLabel Hash;
+    private javax.swing.ButtonGroup HashAlgorithm;
+    private javax.swing.JTextField HashValue;
+    private javax.swing.JRadioButton MD5;
     private javax.swing.JScrollPane PartitionTable;
     private javax.swing.JTextArea PartitionTableData;
     private javax.swing.JButton RefreshDriveList;
+    private javax.swing.JButton RefreshDriveList1;
+    private javax.swing.JRadioButton SHA1;
+    private javax.swing.JRadioButton SHA512;
     private javax.swing.JLabel TotalSpace;
     private javax.swing.JLabel VolumeLabel;
     private javax.swing.JDialog cloneDialog;
@@ -824,7 +977,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JButton jButton5;
     private javax.swing.JButton jButton6;
     private javax.swing.JButton jButton7;
-    private javax.swing.JButton jButton8;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JComboBox jComboBox2;
     private javax.swing.JInternalFrame jInternalFrame1;
@@ -838,9 +990,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JList jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
-    private javax.swing.JRadioButton jRadioButton3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
@@ -848,7 +997,6 @@ hashDialog.setVisible(true);        // TODO add your handling code here:
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
-    private javax.swing.JTextField jTextField4;
     private javax.swing.JLabel lbl_FreeSpace;
     private javax.swing.JLabel lbl_Hash;
     private javax.swing.JLabel lbl_Label;

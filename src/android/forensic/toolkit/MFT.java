@@ -43,12 +43,12 @@ public class MFT {
     
     int File_Reference_to_the_Parent_Directory; //8 bytes       288
     int File_Modification_Times;                //32 bytes      296
-    int Allocated_Size_of_the_File;             //8 bytes       328
-    int Real_Size_of_the_File;                  //8 bytes       336
-    int FlagsL;                                  //8 bytes      344
+    long Allocated_Size_of_the_File;            //8 bytes       328
+    long Real_Size_of_the_File;                 //8 bytes       336
+    int FlagsL;                                 //8 bytes       344
     int Length_of_File_Name;                    //1 byte        352
     int File_Name_Space;                        //1 byte        353
-    String File_Name = "";                           //Length_of_File_Name * 2 bytes 354
+    String File_Name = "";                      //Length_of_File_Name * 2 bytes 354
     
     //we can extract file name, File Creation and
     //Modification times, and Parent Directory Record number.
@@ -76,16 +76,20 @@ public class MFT {
     
     public void set_data(byte[] ar){
         int i;
+        int j=242;
         for(i=0;i<4;i++)
             File_Identifier = File_Identifier.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
         Flags = Utils.hexToInt(Utils.hex(ar[22]), Utils.hex(ar[23]));
-        Name_length = Utils.hexToInt(Utils.hex(ar[352]),"0");
-        for(i=354;i<=(Name_length*2);i++)
-           File_Name = File_Name.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+        Real_Size_of_the_File = Utils.hexToInt(Utils.hex(ar[217]), Utils.hex(ar[218]), Utils.hex(ar[219]), Utils.hex(ar[220]), Utils.hex(ar[221]), Utils.hex(ar[222]), Utils.hex(ar[223]), Utils.hex(ar[224]));
+        Name_length = Utils.hexToInt(Utils.hex(ar[240]),"0");
+        System.out.println("Name length: "+Utils.hex(ar[240]));
+        for(i=0;i<=(Name_length*2);i++){
+           File_Name = File_Name.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i+j]))));
+        }
     }
     
     public void print_data(javax.swing.JTextArea a){
-        a.append(File_Identifier + "\t\t" + Flags + "\t\t" + Name_length + "\t\t" + File_Name +"\n");
+        a.append(File_Identifier + "\t\t" + Flags + "\t\t" + Name_length + "\t\t" + File_Name +"\t\t"+Real_Size_of_the_File+"\n");
     }
     
 }

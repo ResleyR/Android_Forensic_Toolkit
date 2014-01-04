@@ -79,7 +79,7 @@ public class FAT32 extends FAT12 {
     Boolean deleted = null;
     String Image = "";
     static ArrayList <FileRecord> files = new ArrayList<>();
-        
+
 
     @Override
     public void getBPB(String path) throws FileNotFoundException, IOException {
@@ -250,42 +250,43 @@ public class FAT32 extends FAT12 {
         FileWriter fWriter = null;
         BufferedWriter writer = null;
         try {
-                    
+
             File file = new File("src/cache/" + title + ".dat");
             file.getParentFile().mkdirs();
             fWriter = new FileWriter(file);
             writer = new BufferedWriter(fWriter);
-            StringBuilder b = new StringBuilder();
+            StringBuilder b = new StringBuilder("\t0\t1\t2\t3\t4\t5\t6\t7\t\t8\t9\tA\tB\tC\tD\tE\tF\n");
             int j = 0;
             int old_j = 0, new_j;
+            int number_of_root_sectors = 2;
+            int last_byte_in_root = number_of_root_sectors*sectors_per_cluster*bytes_per_Sector;
             filelister:
-            while (j < 7168) {
+            while (j < last_byte_in_root) {
                 FileRecord fileRec = new FileRecord();
                 String name="", size="";
                 long startSector;
 //                System.out.println(j);
                 for(i=j;i<(j+16);i++){
-                    b = b.append(Utils.hex(ar[i])).append("\t");
+                    if (i % 8 == 0) {
+                        b = b.append("\t");
+                    }
+                    b = b.append(Utils.hex(ar[i])).append("\t");                    
                 }
                 b = b.append("\t\t\t");
                 for(i=j;i<(j+16);i++){
-//                    b = b.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i++])+Utils.hex(ar[i]))+"\t"));
-                    b = b.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i])))).append("\t");
+                    b = b.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
                 }
                 b = b.append("\n");
                 for(i=(j+16);i<(j+32);i++){
-                    b = b.append(Utils.hex(ar[i]));
-                    b = b.append("\t");
-                    
+                    if (i % 8 == 0) {
+                        b = b.append("\t");
+                    }
+                    b = b.append(Utils.hex(ar[i])).append("\t");                    
                 }
-                 b = b.append("\t\t\t");
+                b = b.append("\t\t\t");
                  for(i=(j+16);i<(j+32);i++){
                      b = b.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                     b = b.append("\t");
-                     //b = b.append(String.valueOf(Utils.hexToText(Utils.hex(ar[i])+Utils.hex(ar[--i]))));
-//                    b = b.append(Utils.hexToText(Utils.hex(ar[i++])+Utils.hex(ar[i]))+"\t");
-                    
-                }
+                 }
                 b = b.append("\n");
                 body = b.toString();
                 a.setText(body);
@@ -348,7 +349,7 @@ public class FAT32 extends FAT12 {
 //                                        body = body.concat(temp);
                                     }
                                     j -= 32;
-                                
+
                                 }
                                 j = new_j;
 //                                    body = body.concat("</td>");
@@ -365,10 +366,10 @@ public class FAT32 extends FAT12 {
                                 break;
                         }
 //                        body = body.concat("</name>");
-                              
+
 //                        body = body.concat(attrib);
-                        i = j + 20;           //Byte 20-21 starting sector high order 
-                        //Byte 26-27 starting sector low  order 
+                        i = j + 20;           //Byte 20-21 starting sector high order
+                        //Byte 26-27 starting sector low  order
 //                            a.append("@ sector " + String.format("%04X\t", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0")));
                  startSector = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0");
                         //      body = body.concat("<sector>" + String.format("%04X\t", Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i]), Utils.hex(ar[i = j + 26]), Utils.hex(ar[++i]), "0", "0", "0", "0")) + "</sector>");
@@ -385,7 +386,7 @@ public class FAT32 extends FAT12 {
                         fileRec.setFileSize(size);
                         fileRec.setFoundAt(j);
                         files.add(fileRec);
-                        
+
                         break;
 
 
@@ -405,8 +406,8 @@ public class FAT32 extends FAT12 {
                 //increment by 32 to go to next file entry.
                 j += 32;
 //                    body = body.concat("</tr>");
-                
-                
+
+
 //                body = body.concat("</file>");
             }
 //                body = body.concat("</table>");
@@ -416,13 +417,13 @@ public class FAT32 extends FAT12 {
             //  htmlString = htmlString.replace("$body", body);
 //            a.appen d(body);
             writer.write(body);
-            writer.close(); //make sure you close the writer object 
+            writer.close(); //make sure you close the writer object
 
         } catch (Exception ex) {
             Logger.getLogger(FAT32.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Exception Occured");
         }
-        
+
         FileList filelist = new FileList();
         filelist.setFile(files);
          // create JAXB context and instantiate marshaller
@@ -443,18 +444,12 @@ public class FAT32 extends FAT12 {
 first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FATL);
         jumpto = (int) (first_cluster - 2 + first_data_sector) * bytes_per_Sector;
            diskAccess.seek(jumpto);
-            
-            
+
+
         title = "" + serial_number;
-//        body = "<table style='border-spacing: 10px 0;'>";
-//         body = "<?xml version=\"1.0\" encoding=\"UTF-16\"?><filelist>";
-//        File cachedFile = new File("src/cache/" + title + ".html");
         File cachedXML = new File("src/cache/" + title + ".xml");
         File cachedDAT = new File("src/cache/" + title + ".dat");
-//        e.setEditable(false);
-//        e.setContentType("text/xml");
         if (cachedXML.exists() && cachedDAT.exists() && !forceReCalc) {
-//            e.setPage("file:///" + cachedFile.getAbsoluteFile());
             FileReader dat = new FileReader(cachedDAT);
             a.read(dat, null);
             JAXBContext context = JAXBContext.newInstance(FileList.class);
@@ -465,136 +460,24 @@ first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FATL)
                 System.out.println("Unmarshalled");
             else
                 System.err.println("Error in unmarshallling");
-//    ArrayList<FileRecord> arr_list = filesList.getFile();
-                 files = filesList.getFile();
-//    for (FileRecord file : arr_list) {
-//      System.out.println("" + file.getName() + "\t" + file.getAttributes() + "\t" + file.getFileSize());
-//    }
-//    
-    list.setBackground(Color.white);
-//    list.setSelectionBackground(Color.cyan);
-//    list.setForeground(Color.black);
-    list.setSelectionForeground(Color.white);
-    DefaultListModel l1 = new DefaultListModel();
-            for(FileRecord file:files){
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-       //         panel.setBackground(Color.WHITE);
-                
-               java.net.URL imgUrl = getClass().getResource(file.img);
-//                System.out.println(file.name+"\t\t"+file.filesize);
-               if (imgUrl != null) {
-//                   System.out.println("Found "+imgUrl);
-                panel.add(new JLabel(new ImageIcon(imgUrl)));
-                
-               }
-               panel.add(new JLabel(file.name+"   "+file.filesize));
-               l1.addElement(panel);
-            }
-           list.setModel(l1);
-            //list.setEnabled(true);
-            //list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-           // list.setAlignmentY((float) 5.0);
-            //list.setListData(vector);
-            //list = new JList(files.toArray());
-            //list.setVisibleRowCount(10);
-            list.setSelectedIndex(0);
-            list.addListSelectionListener(new ListSelectionListener() {
-
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                        System.out.println(String.format("Selected: %s", list.getSelectedIndex()));
-
-}
-            });
-            list.setCellRenderer(new CustomCellRenderer());
-//            list.setCellRenderer(new DefaultListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent
-//    (JList list, Object value, int index, 
-//     boolean isSelected,boolean cellHasFocus) {
-//     Component component = (Component)value;
-//     return component;
-//     }
-//        }  );
+            files = filesList.getFile();
+            listFiles(list);
             MainJFrame.re_calc.setVisible(true);
         } else {
-                    byte[] ar;
-        
-        
-        
-        
-        ar = new byte[((int) sectors_per_FATL) * bytes_per_Sector];//16*16*100];
-        Arrays.fill(ar, (byte) 0);
-        address = reserved_sectors * bytes_per_Sector;
-
-        diskAccess.seek(jumpto);
-
-        diskAccess.read(ar);
-
+            byte[] ar;
+            ar = new byte[((int) sectors_per_FATL) * bytes_per_Sector];//16*16*100];
+            Arrays.fill(ar, (byte) 0);
+            address = reserved_sectors * bytes_per_Sector;
+            diskAccess.seek(jumpto);
+            diskAccess.read(ar);
             recalulate(a, ar);
-//            Vector vector = new Vector();
-                list.setBackground(Color.white);
-//    list.setSelectionBackground(Color.cyan);
-//    list.setForeground(Color.black);
-    list.setSelectionForeground(Color.white);
-            DefaultListModel l1 = new DefaultListModel();
-            for(FileRecord file:files){
-                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-                
-               java.net.URL imgUrl = getClass().getResource(file.img);
-                System.out.println(file.name+"\t\t"+file.filesize);
-               if (imgUrl != null) {
-//                   System.out.println("Found "+imgUrl);
-                panel.add(new JLabel(new ImageIcon(imgUrl)));
-                
-               }
-               else{
-//                   System.out.println("  ERROR  couldn't find "+file.img);
-               }
-//                panel.add(new JLabel(file.name+"   "+file.filesize, new ImageIcon(file.img), FlowLayout.LEFT));
-                panel.add(new JLabel(file.name+"   "+file.filesize));
-//                vector.addElement(panel);
-                l1.addElement(panel);
-            }
-            list.setModel(l1);
-            list.setEnabled(true);
-            list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-           // list.setAlignmentY((float) 5.0);
-            //list.setListData(vector);
-            //list = new JList(files.toArray());
-            list.setVisibleRowCount(10);
-                        list.setSelectedIndex(0);
-            list.addListSelectionListener(new ListSelectionListener() {
-
-                @Override
-                public void valueChanged(ListSelectionEvent e) {
-                        System.out.println(String.format("Selected: %s", list.getSelectedIndex()));
-
-}
-            });
-            list.setCellRenderer(new CustomCellRenderer());
-//        list.setCellRenderer(new DefaultListCellRenderer() {
-//            @Override
-//            public Component getListCellRendererComponent
-//    (JList list, Object value, int index, 
-//     boolean isSelected,boolean cellHasFocus) {
-//     Component component = (Component)value;
-//     return component;
-//     }
-//        }  );
-
-
-            
-//                        System.out.println(body);
-//            Document doc = e.getDocument();
-//            doc.putProperty(Document.StreamDescriptionProperty, null);
-//            e.setPage("file:///" + cachedFile.getAbsoluteFile());
+            listFiles(list);
+            diskAccess.close();
+            System.out.println("closed diskAccess");
         }
-        diskAccess.close();
-        System.out.println("closed diskAccess");
     }
-    
-    public void recoverFiles(javax.swing.JList list, String path) throws FileNotFoundException, IOException {
+
+    public void recoverFiles(javax.swing.JList list, String path) throws FileNotFoundException {
         if(!list.isSelectionEmpty()){
 //            System.out.println(list.getSelectedIndex());
 //                        System.out.println(list.getSelectedValue());
@@ -608,7 +491,7 @@ first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FATL)
                //int fileLoc =  jumpto +  file.getFoundAt();
             byte ar[] = new byte[7168];
             diskRoot = new File("\\\\.\\" + path);
-            System.out.println(path);
+            System.out.println("\\\\.\\" + path);
             diskAccess = new RandomAccessFile(diskRoot, "rwd");
             System.out.println(diskRoot.exists());
             System.out.println(diskRoot.getAbsolutePath());
@@ -620,48 +503,87 @@ first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FATL)
             bb.put(b);
             System.out.println(bb.toString());
         for(int k=0;k<indices.length;k++){
-            System.out.println(indices[k]);
-            FileRecord file = files.get(indices[k]);
-            Long fileLoc = (long) jumpto + (long) file.getFoundAt();
-                        diskAccess.seek(jumpto);
-            System.out.println("File Pointer: "+diskAccess.getFilePointer());
-            diskAccess.read(ar);
-//            diskAccess.seek(15806465);
-//         diskAccess.skipBytes(32);//file.getFoundAt());
-            FileChannel fc = diskAccess.getChannel();
-            System.out.println("open?"+fc.isOpen());
-            
-//            System.out.println(diskAccess.);
-System.out.println("File Pointer: "+diskAccess.getFilePointer());
-System.out.println("File Position: "+fc.position());
-//int b = diskAccess.read();
-            if (Utils.hexToInt(Utils.hex(ar[file.getFoundAt()]), "0") == 0xE5) {
-                System.out.println("Lets recover "+file.getName());
-//                diskAccess.seek(fileLoc);
-                fc.position(fileLoc);
-                System.out.println("File Position: "+fc.position());
-                fc.write(bb);
-                System.out.println("File Position: "+fc.position());
-                fc.position(fileLoc);
-                System.out.println("File Position: "+fc.position());
-                //diskAccess.write(1);
-//                diskAccess.seek(fileLoc);
-              
-                System.out.println("File Pointer: "+diskAccess.getFilePointer());
-                for (i = 0; i <= 10; i++) //Byte 0-10 filename
-                                {
-                                    System.out.print(String.valueOf(Utils.hexToText(Utils.hex(ar[file.getFoundAt()+i]))));
-                              }
-            }else{
-                System.out.println("Why recover an existing file?");
-                for (i = 0; i <= 10; i++) //Byte 0-10 filename
-                                {
-                                    System.out.print(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
-                              }
-            }
-            System.out.println(file.getName()+"\t"+file.getFileSize()+"\tfrom"+file.getFoundAt());
+           try {
+               System.out.println(indices[k]);
+               FileRecord file = files.get(indices[k]);
+               Long fileLoc = (long) jumpto + (long) file.getFoundAt();
+               System.out.println("Seeking to "+jumpto);
+                           diskAccess.seek(jumpto);
+               System.out.println("File Pointer: "+diskAccess.getFilePointer());
+               diskAccess.read(ar);
+               System.out.println("Long Max " + Long.MAX_VALUE);
+               System.out.println("Long Min "+ Long.MIN_VALUE);//System.out.println("File Pointer: "+diskAccess.getFilePointer());           diskAccess.seek(jumpto-235456);
+               System.out.println("File Pointer: "+diskAccess.getFilePointer());
+   System.out.println("Seeking to "+fileLoc);
+                           diskAccess.seek(fileLoc);
+               System.out.println("File Pointer: "+diskAccess.getFilePointer());
+   //            diskAccess.seek(15806465);
+   //         diskAccess.skipBytes(32);//file.getFoundAt());
+               FileChannel fc = diskAccess.getChannel();
+               System.out.println("open?"+fc.isOpen());
+
+   //            System.out.println(diskAccess.);
+   System.out.println("File Pointer: "+diskAccess.getFilePointer());
+   System.out.println("File Position: "+fc.position());
+   //int b = diskAccess.read();
+               if (Utils.hexToInt(Utils.hex(ar[file.getFoundAt()]), "0") == 0xE5) {
+                   System.out.println("Lets recover "+file.getName());
+   //                diskAccess.seek(fileLoc);
+                   fc.position(fileLoc);
+                   System.out.println("File Position: "+fc.position());
+                   fc.write(bb);
+                   System.out.println("File Position: "+fc.position());
+                   fc.position(fileLoc);
+                   System.out.println("File Position: "+fc.position());
+                   //diskAccess.write(1);
+   //                diskAccess.seek(fileLoc);
+
+                   System.out.println("File Pointer: "+diskAccess.getFilePointer());
+                   for (i = 0; i <= 10; i++) //Byte 0-10 filename
+                                   {
+                                       System.out.print(String.valueOf(Utils.hexToText(Utils.hex(ar[file.getFoundAt()+i]))));
+                                 }
+               }else{
+                   System.out.println("Why recover an existing file?");
+                   for (i = 0; i <= 10; i++) //Byte 0-10 filename
+                                   {
+                                       System.out.print(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+                                 }
+               }
+               System.out.println(file.getName()+"\t"+file.getFileSize()+"\tfrom"+file.getFoundAt());
+           } catch (IOException ex) {
+               ex.printStackTrace();
+               Logger.getLogger(FAT32.class.getName()).log(Level.SEVERE, null, ex);
+           }
         }
     }else
             System.out.println("Empty selection");
+    }
+
+    private void listFiles(final javax.swing.JList list) {
+
+        list.setEnabled(true);
+        list.setBackground(Color.white);
+        list.setSelectionForeground(Color.white);
+        DefaultListModel l1 = new DefaultListModel();
+        for(FileRecord file:files){
+                JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+                java.net.URL imgUrl = getClass().getResource(file.img);
+               if (imgUrl != null) {
+                   panel.add(new JLabel(new ImageIcon(imgUrl)));
+               }
+               panel.add(new JLabel(file.name+"   "+file.filesize));
+               l1.addElement(panel);
+            }
+        list.setModel(l1);
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        list.setSelectedIndex(0);
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                System.out.println(String.format("Selected: %s", list.getSelectedIndex()));
+            }
+        });
+            list.setCellRenderer(new CustomCellRenderer());
     }
 }
