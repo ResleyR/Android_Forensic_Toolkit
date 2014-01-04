@@ -14,8 +14,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonModel;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.bind.JAXBException;
+import sun.rmi.log.ReliableLog;
 
 /**
  *
@@ -76,6 +80,7 @@ String jump_instruction = null, path=null;
         ComputeHash = new javax.swing.JButton();
         RefreshDriveList1 = new javax.swing.JButton();
         HashAlgorithm = new javax.swing.ButtonGroup();
+        FileSaveAs = new javax.swing.JFileChooser();
         DriveSelector = new javax.swing.JComboBox();
         lbl_SelectDrive = new javax.swing.JLabel();
         get_details = new javax.swing.JButton();
@@ -111,7 +116,17 @@ String jump_instruction = null, path=null;
         re_calc = new javax.swing.JButton();
         recoverFiles = new javax.swing.JButton();
 
+        cloneDialog.setTitle("Clone Disk - Android Forensic Toolkit");
+        cloneDialog.setAlwaysOnTop(true);
+        cloneDialog.setBounds(new java.awt.Rectangle(0, 0, 300, 150));
+        cloneDialog.setResizable(false);
+
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
+            jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+                public void actionPerformed(java.awt.event.ActionEvent evt) {
+                    jComboBox1ActionPerformed(evt);
+                }
+            });
 
             jLabel1.setText("Disk to Clone:");
 
@@ -120,8 +135,14 @@ String jump_instruction = null, path=null;
                 jLabel2.setText("Save to: ");
 
                 jButton4.setText("Browse");
+                jButton4.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        jButton4ActionPerformed(evt);
+                    }
+                });
 
                 jProgressBar1.setValue(74);
+                jProgressBar1.setIndeterminate(true);
 
                 jButton5.setText("Cancel");
                 jButton5.addActionListener(new java.awt.event.ActionListener() {
@@ -169,7 +190,7 @@ String jump_instruction = null, path=null;
                             .addComponent(jButton4))
                         .addGap(18, 18, 18)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(22, Short.MAX_VALUE))
+                        .addContainerGap(32, Short.MAX_VALUE))
                 );
 
                 hashDialog.setTitle("Compute Hash - Android Forensic Toolkit");
@@ -301,6 +322,10 @@ String jump_instruction = null, path=null;
                             .addComponent(jButton6)
                             .addContainerGap(60, Short.MAX_VALUE))
                     );
+
+                    FileSaveAs.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
+                    FileSaveAs.setFileFilter(new FileNameExtensionFilter("Disk Image (*.iso)", ".iso"));
+                    FileSaveAs.setFileSelectionMode(javax.swing.JFileChooser.FILES_AND_DIRECTORIES);
 
                     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
                     setTitle("Android Forensic Toolkit");
@@ -705,11 +730,12 @@ recoverFiles.setVisible(true);
     }//GEN-LAST:event_RefreshDriveListActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+       cloneDialog.setVisible(false);
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void clone_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clone_diskActionPerformed
         cloneDialog.setVisible(true);
+        this.getDrives(jComboBox1);
     }//GEN-LAST:event_clone_diskActionPerformed
 
     private void hash_diskActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hash_diskActionPerformed
@@ -796,9 +822,6 @@ recoverFiles.setVisible(true);
             ButtonModel algorithm = HashAlgorithm.getSelection();
             String algo = algorithm.getActionCommand();
             try {
-                switch(algorithm.getActionCommand()){
-                    default: System.out.println(algorithm.getActionCommand());
-                }
                 m = MessageDigest.getInstance(algo);
             } catch (NoSuchAlgorithmException ex) {
                 Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
@@ -850,6 +873,43 @@ recoverFiles.setVisible(true);
        this.getDrives(jComboBox2);
     }//GEN-LAST:event_RefreshDriveList1ActionPerformed
 
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        int returnVal = FileSaveAs.showSaveDialog(this);
+    if (returnVal == JFileChooser.APPROVE_OPTION) {
+        File file = FileSaveAs.getSelectedFile();
+        try {
+          // What to do with the file, e.g. display it in a TextArea
+            System.out.println(file.getAbsolutePath());
+            RandomAccessFile t = new RandomAccessFile(file, "rw");
+            File src = new File(jComboBox1.getSelectedItem().toString());
+            RandomAccessFile s = new RandomAccessFile("\\\\.\\"+src, "r");
+            byte[] content = new byte[5242880];
+            long diskSize = src.getTotalSpace();
+            int stop = (int) (diskSize/5242880);
+            int extra = (int) (diskSize%5242880);
+            for(int i=0;i<=stop;i++)
+            {
+                System.out.println(i);
+                s.readFully(content);
+                t.write(content);
+            }
+            content = new byte[extra];
+            s.read(content);
+            t.write(content);
+                
+         // textarea.read( new FileReader( file.getAbsolutePath() ), null );
+        } catch (IOException ex) {
+          System.out.println("problem accessing file"+file.getAbsolutePath());
+        }
+    } else {
+        System.out.println("File access cancelled by user.");
+    }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -893,6 +953,7 @@ recoverFiles.setVisible(true);
     private javax.swing.JButton ComputeHash;
     private javax.swing.JComboBox DriveSelector;
     private javax.swing.JLabel DriveType;
+    private javax.swing.JFileChooser FileSaveAs;
     private javax.swing.JLabel FreeSpace;
     private javax.swing.JLabel Hash;
     private javax.swing.ButtonGroup HashAlgorithm;
