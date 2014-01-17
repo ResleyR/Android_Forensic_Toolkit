@@ -40,6 +40,7 @@ public class FAT12 {
         diskRoot = new File("\\\\.\\" + path);
         diskAccess = new RandomAccessFile(diskRoot, "r");
         diskAccess.readFully(content);
+        
         jump_instruction = Utils.hex(content[i++]) +Utils.hex(content[i++]) + Utils.hex(content[i++]);          //0-2
         for (i = 3; i <= 10; i++) {
             OEM_name = OEM_name.concat(String.valueOf(Utils.hexToText(Utils.hex(content[i]))));                 //3-10

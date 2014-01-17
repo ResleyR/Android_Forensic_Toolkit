@@ -15,11 +15,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.ButtonModel;
 import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
 import javax.xml.bind.JAXBException;
-import sun.rmi.log.ReliableLog;
 
 /**
  *
@@ -28,6 +26,7 @@ import sun.rmi.log.ReliableLog;
 
 public class MainJFrame extends javax.swing.JFrame {
 String jump_instruction = null, path=null;
+private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
     public void getDrives(javax.swing.JComboBox DriveSelector) {
 
         DriveSelector.removeAllItems();
@@ -195,7 +194,6 @@ String jump_instruction = null, path=null;
 
                 hashDialog.setTitle("Compute Hash - Android Forensic Toolkit");
                 hashDialog.setBounds(new java.awt.Rectangle(0, 0, 400, 240));
-                hashDialog.setPreferredSize(new java.awt.Dimension(400, 240));
                 hashDialog.setResizable(false);
 
                 MD5.setText("MD5");
@@ -330,6 +328,7 @@ String jump_instruction = null, path=null;
                     setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
                     setTitle("Android Forensic Toolkit");
                     setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+                    setResizable(false);
 
                     DriveSelector.setName(""); // NOI18N
 
@@ -618,39 +617,57 @@ String jump_instruction = null, path=null;
             switch (jump_instruction) {
                 case "EB5290":
                     {
-                        NTFS disk = new NTFS();
+                        ntfs = new NTFS();
                         jTabbedPane1.setTitleAt(1, "MFT");
-                        disk.getBPB(path);
-                        disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readMFT(PartitionTableData);
-                        TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector * disk.total_sectors));
+                        ntfs.getBPB(path);
+                        ntfs.printBPB(BootSectorData,BootSectorHexData);
+                        ntfs.readMFT(PartitionTableData);
+                        TotalSpace.setText(Utils.getSize(ntfs.bytes_per_Sector * ntfs.total_sectors));
                         break;
                     }
                 case "EB5890":
                     {
-                        FAT32 disk = new FAT32();
+                        fat32 = new FAT32();
                         jTabbedPane1.setTitleAt(1, "FAT");
-                        disk.getBPB(path);
-                        disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileList, false);
-                        VolumeLabel.setText(disk.label);
-                        jTextField1.setText(disk.type);
-                        if(disk.total_sectors==0)
-                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectorsL));
+                        fat32.getBPB(path);
+                        fat32.printBPB(BootSectorData,BootSectorHexData);
+                        fat32.readFAT(PartitionTableData, fileList, false);
+                        VolumeLabel.setText(fat32.label);
+                        jTextField1.setText(fat32.type);
+                        if(fat32.total_sectors==0)
+                            TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectorsL));
                         else
-                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectors));
+                            TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectors));
                         break;
                     }
+                case "EB0090":
+                {
+                    fat16 = new FAT16();
+                    jTabbedPane1.setTitleAt(1, "FAT");
+                    fat16.getBPB(path);
+                    fat16.printBPB(BootSectorData, BootSectorHexData);
+                    //disk.readFAT(PartitionTableData);
+                    VolumeLabel.setText(fat16.label);
+                    jTextField1.setText(fat16.type);
+                    if(fat16.total_sectors==0)
+                        TotalSpace.setText(Utils.getSize(fat16.bytes_per_Sector*fat16.total_sectorsL));
+                    else
+                        TotalSpace.setText(Utils.getSize(fat16.bytes_per_Sector*fat16.total_sectors));
+                    break;
+                }
                 default:
+                    int i=0;
+                    jump_instruction = Utils.hex(content[i++]) +Utils.hex(content[i++]) + Utils.hex(content[i++]);          //0-2
+                    System.out.println(String.format("%-22s\t%s","Jump Instruction",jump_instruction));
                     int sector_size = Utils.hexToInt(Utils.hex(content[11]), Utils.hex(content[12]));
                     int reserved_sectors = Utils.hexToInt(Utils.hex(content[14]), Utils.hex(content[15]));
                     int number_of_fat_sectors = Utils.hexToInt(Utils.hex(content[36]), Utils.hex(content[37]), Utils.hex(content[38]), Utils.hex(content[39]));
                     BootSectorData.append("OEM = ");
-                    for (int i = 3; i <= 10; i++) {
+                    for (i = 3; i <= 10; i++) {
                         BootSectorData.append(String.valueOf(Utils.hexToText(Utils.hex(content[i]))));
                     }
                     BootSectorData.append("\nFilesystem Type = ");
-                    for (int i = 82; i <= 89; i++) {
+                    for (i = 82; i <= 89; i++) {
                         BootSectorData.append(String.valueOf(Utils.hexToText(Utils.hex(content[i]))));
                     }
                     BootSectorData.append("\nNumber of bytes per sector = " + sector_size + "\n");
@@ -661,7 +678,7 @@ String jump_instruction = null, path=null;
                     BootSectorData.append("\t\t 0\t 1\t 2\t 3\t 4\t 5\t 6\t 7\t\t 8\t 9\t A\t B\t C\t D\t E\t F");
                     PartitionTableData.append("\t\t 0\t 1\t 2\t 3\t 4\t 5\t 6\t 7\t\t 8\t 9\t A\t B\t C\t D\t E\t F");
                     int address = 0x000000;
-                    for (int i = 0; i < sector_size; i++) {
+                    for ( i = 0; i < sector_size; i++) {
                         txm = content[i];
                         if (i % 16 == 0) {
                             BootSectorData.append(String.format("\n%07X0\t", address++));
@@ -682,7 +699,7 @@ String jump_instruction = null, path=null;
                     //        address = Integer.valueOf(Integer.toHexString(reserved_sectors*sector_size), 16);
                     address = Integer.parseInt(Integer.toHexString(reserved_sectors * sector_size), 16);
                     System.out.println("Address = " + address);
-                    for (int i = 0; i < 1921024; i++) {
+                    for ( i = 0; i < 1921024; i++) {
                         txm = content[i];
                         if (i % 16 == 0) {
                             PartitionTableData.append(String.format("\n%08X\t", address));
@@ -698,7 +715,7 @@ String jump_instruction = null, path=null;
                     content = new byte[16384];
                     System.out.println("@" + diskAccess.getFilePointer());
                     diskAccess.readFully(content);
-                    for (int i = 0; i < 512; i++) {
+                    for ( i = 0; i < 512; i++) {
 
                         for (int j = (i * 32); j <= (i * 32) + 10; j++) {
                             System.out.print(Utils.hexToText(Utils.hex(content[j])));
@@ -754,27 +771,27 @@ recoverFiles.setVisible(true);
             switch (jump_instruction) {
                 case "EB5290":
                     {
-                        NTFS disk = new NTFS();
+                        ntfs = new NTFS();
                         jTabbedPane1.setTitleAt(1, "MFT");
-                        disk.getBPB(path);
-                        disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readMFT(PartitionTableData);
-                        TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector * disk.total_sectors));
+                        ntfs.getBPB(path);
+                        ntfs.printBPB(BootSectorData,BootSectorHexData);
+                        ntfs.readMFT(PartitionTableData);
+                        TotalSpace.setText(Utils.getSize(ntfs.bytes_per_Sector * ntfs.total_sectors));
                         break;
                     }
                 case "EB5890":
                     {
-                        FAT32 disk = new FAT32();
+                        fat32 = new FAT32();
                         jTabbedPane1.setTitleAt(1, "FAT");
-                        disk.getBPB(path);
-                        disk.printBPB(BootSectorData,BootSectorHexData);
-                        disk.readFAT(PartitionTableData, fileList, true);
-                        VolumeLabel.setText(disk.label);
-                        jTextField1.setText(disk.type);
-                        if(disk.total_sectors==0)
-                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectorsL));
+                        fat32.getBPB(path);
+                        fat32.printBPB(BootSectorData,BootSectorHexData);
+                        fat32.readFAT(PartitionTableData, fileList, true);
+                        VolumeLabel.setText(fat32.label);
+                        jTextField1.setText(fat32.type);
+                        if(fat32.total_sectors==0)
+                            TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectorsL));
                         else
-                            TotalSpace.setText(Utils.getSize(disk.bytes_per_Sector*disk.total_sectors));
+                            TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectors));
                         break;
                     }
                 default:
@@ -797,8 +814,7 @@ recoverFiles.setVisible(true);
                 case "EB5890":
                     {
                         
-                        FAT32 disk = new FAT32();
-                        disk.recoverFiles(fileList, path);
+                        fat32.recoverFiles(fileList, path);
 //                        disk.recoverFiles(jList1);
                     }
                 default:
