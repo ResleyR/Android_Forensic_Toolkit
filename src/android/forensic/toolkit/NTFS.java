@@ -85,7 +85,7 @@ public class NTFS {
     public void readMFT(javax.swing.JTextArea a) throws IOException {
         MFT[] mft_header = new MFT[200];
         System.out.println(diskAccess.getFilePointer());
-        diskAccess.seek(location_$MFT*sectors_per_cluster*bytes_per_Sector);
+        diskAccess.seek((location_$MFT*sectors_per_cluster*bytes_per_Sector)+17408);    //skip first 16 records
         System.out.println("Max: "+total_sectors*bytes_per_Sector);
         System.out.println(diskAccess.getFilePointer());
         byte ar[] = new byte[1024];

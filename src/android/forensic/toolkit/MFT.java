@@ -12,18 +12,19 @@ public class MFT {
  //   int flag;       //at byte 21
   //  int Length of File Name; //1 byte
     
-    String File_Identifier = "";     //4 bytes               0
-    int Offset_to_update_sequence;//2 bytes             4
-    int Size_of_update_sequence;    //2 bytes           6
-    int $LogFile_Sequence_Number;   //8 bytes           8
-    int Sequence_Number;            //2 bytes           16
-    int Reference_Count;            //2 bytes           18
-    int Offset_to_Update_Sequence_Array;//2 bytes       20
-    int Flags;                      //2 bytes           22
-    int Real_size_of_the_FILE_record;//4 bytes          24
-    int allocated_size_of_the_FILE_record;//4 bytes     28
-    int File_reference_to_the_base_FILE_record; //8 bytes32
-    int Next_Attribute_Id;          //2 bytes           40
+    String File_Identifier = "";     //4 bytes          0       0x00-0x03
+    int Offset_to_update_sequence;//2 bytes             4       0x04 0x05
+    int Size_of_update_sequence;    //2 bytes           6       0x06 0x07
+    int $LogFile_Sequence_Number;   //8 bytes           8       0x08-0x0F
+    int Sequence_Number;            //2 bytes           16      0x10 0x11
+    int Reference_Count;            //2 bytes           18      0x12 0x13
+    int Offset_to_Update_Sequence_Array;//2 bytes       20      0x14 0x15
+    int Flags;                      //2 bytes           22      0x16 0x17
+    int Real_size_of_the_FILE_record;//4 bytes          24      0x18-0x1B       //logical size
+    int allocated_size_of_the_FILE_record;//4 bytes     28      0x1C-0x1F       //physical size
+    int File_reference_to_the_base_FILE_record; //8 bytes32     0x20-0x27       //0 means itself
+    int Next_Attribute_Id;          //4 bytes           40      0x28-0x2B
+    int Id_of_this_FILE;            //4 bytes           44      0x2C-0x2F  
         
     //If Flags field has bit 1 set, it means that file is in-use. Zero means it is deleted.
     
@@ -46,9 +47,9 @@ public class MFT {
     long Allocated_Size_of_the_File;            //8 bytes       328
     long Real_Size_of_the_File;                 //8 bytes       336
     int FlagsL;                                 //8 bytes       344
-    int Length_of_File_Name;                    //1 byte        352
-    int File_Name_Space;                        //1 byte        353
-    String File_Name = "";                      //Length_of_File_Name * 2 bytes 354
+    int Length_of_File_Name;                    //1 byte        352     0xF0
+    int File_Name_Space;                        //1 byte        353     0xF1
+    String File_Name = "";                      //Length_of_File_Name * 2 bytes 354     0xF2-...
     
     //we can extract file name, File Creation and
     //Modification times, and Parent Directory Record number.
@@ -76,20 +77,41 @@ public class MFT {
     
     public void set_data(byte[] ar){
         int i;
-        int j=242;
-        for(i=0;i<4;i++)
+        int j;//=242;
+        Offset_to_Update_Sequence_Array = Utils.hexToInt(Utils.hex(ar[20]), Utils.hex(ar[21]));
+        for(i=0;i<4;i++)        //byte 0-3  0x00-0x03
             File_Identifier = File_Identifier.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
+        //Flags byte 22-23 0x16-0x17
         Flags = Utils.hexToInt(Utils.hex(ar[22]), Utils.hex(ar[23]));
-        Real_Size_of_the_File = Utils.hexToInt(Utils.hex(ar[217]), Utils.hex(ar[218]), Utils.hex(ar[219]), Utils.hex(ar[220]), Utils.hex(ar[221]), Utils.hex(ar[222]), Utils.hex(ar[223]), Utils.hex(ar[224]));
-        Name_length = Utils.hexToInt(Utils.hex(ar[240]),"0");
-        System.out.println("Name length: "+Utils.hex(ar[240]));
-        for(i=0;i<=(Name_length*2);i++){
+        do {
+            System.out.println("Offset: "+Utils.hex(Offset_to_Update_Sequence_Array));
+        
+            i = Offset_to_Update_Sequence_Array;
+            System.out.print("i: "+Utils.hex(i));
+            Attribute_Type = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]),Utils.hex(ar[i++]), Utils.hex(ar[i++]));
+            System.out.print("\tType: "+Utils.hex(Attribute_Type));
+            System.out.print("\ti: "+Utils.hex(i));
+            int temp = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]),Utils.hex(ar[i++]), Utils.hex(ar[i++]));      //Offset + Length of Attribute
+            System.out.print("\tLength: "+temp+"\t\t");
+            Offset_to_Update_Sequence_Array += temp;
+        }while(Attribute_Type!=48);     //Loop until Attribute Type is 0x30 (Std Info)
+        System.out.println("");
+      //  i=224;
+     //   Real_Size_of_the_File = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]), Utils.hex(ar[i++]));
+        i+=80;
+        Name_length = Utils.hexToInt(Utils.hex(ar[i]),"0");
+        System.out.println("Offset: "+Utils.hex(i)+"\tName length: "+Utils.hex(ar[i++]));
+        i++;
+        for(j=0;j<=(Name_length*2);j++){
            File_Name = File_Name.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i+j]))));
         }
+        System.out.println(File_Name);
     }
     
     public void print_data(javax.swing.JTextArea a){
-        a.append(File_Identifier + "\t\t" + Flags + "\t\t" + Name_length + "\t\t" + File_Name +"\t\t"+Real_Size_of_the_File+"\n");
+        a.append(File_Identifier + "\t\t" + Flags + "\t\t" + Name_length + "\t\t" + File_Name +"\t\t"+
+               // Utils.getSize(Real_Size_of_the_File)+
+                "\n");
     }
     
 }
