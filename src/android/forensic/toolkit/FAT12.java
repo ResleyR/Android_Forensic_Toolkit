@@ -234,7 +234,7 @@ public class FAT12 {
             writer = new BufferedWriter(fWriter);
             StringBuilder b = new StringBuilder("\t0\t1\t2\t3\t4\t5\t6\t7\t\t8\t9\tA\tB\tC\tD\tE\tF\n");
             int j = 0, old_j = 0, new_j;
-            int number_of_root_sectors = 2;
+            int number_of_root_sectors = 2;         //needs to be dynamic
             int last_byte_in_root = number_of_root_sectors * sectors_per_cluster * bytes_per_Sector;
             System.out.println("last byte:   "+last_byte_in_root);
             System.out.println("65k entries: "+(65536*32));

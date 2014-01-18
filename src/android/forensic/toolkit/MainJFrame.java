@@ -621,7 +621,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                         jTabbedPane1.setTitleAt(1, "MFT");
                         ntfs.getBPB(path);
                         ntfs.printBPB(BootSectorData,BootSectorHexData);
-                        ntfs.readMFT(PartitionTableData);
+                        ntfs.readMFT(PartitionTableData,fileList,false);
                         TotalSpace.setText(Utils.getSize(ntfs.bytes_per_Sector * ntfs.total_sectors));
                         break;
                     }
@@ -775,7 +775,7 @@ recoverFiles.setVisible(true);
                         jTabbedPane1.setTitleAt(1, "MFT");
                         ntfs.getBPB(path);
                         ntfs.printBPB(BootSectorData,BootSectorHexData);
-                        ntfs.readMFT(PartitionTableData);
+                        ntfs.readMFT(PartitionTableData,fileList, true);
                         TotalSpace.setText(Utils.getSize(ntfs.bytes_per_Sector * ntfs.total_sectors));
                         break;
                     }

@@ -4,10 +4,23 @@
  */
 package android.forensic.toolkit;
 
+import java.awt.Color;
+import java.awt.FlowLayout;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.ArrayList;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 
 /**
  *
@@ -28,13 +41,15 @@ public class NTFS {
     long location_$MFTMirr;             //56-63         0x38
     int clusters_per_file_segment;      //64-67         0x40
     int clusters_per_index_buffer;      //68            0x44
-    int volume_serial_number;           //72-79         0x48         
+    long volume_serial_number;           //72-79         0x48         
     int checksum;                       //80-81         0x50
     int i=0;
     RandomAccessFile diskAccess;
     byte[] content = new byte[512];
     int address = 0x000000;
-
+    
+    public static ArrayList<FileRecord> files = new ArrayList<>();
+    
     public void getBPB(String path) throws FileNotFoundException, IOException {
         File diskRoot = new File("\\\\.\\" + path);
         diskAccess = new RandomAccessFile(diskRoot, "r");
@@ -55,9 +70,9 @@ public class NTFS {
         total_sectors = Utils.hexToInt(Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]));
         location_$MFT = Utils.hexToInt(Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]));
         location_$MFTMirr = Utils.hexToInt(Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]));
-
+        volume_serial_number = Utils.hexToInt(Utils.hex(content[i=72]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]), Utils.hex(content[i++]));
     }
-
+    
     public void printBPB(javax.swing.JTextArea a,javax.swing.JTextArea b) {
        b.append("\t\t 0\t 1\t 2\t 3\t 4\t 5\t 6\t 7\t\t 8\t 9\t A\t B\t C\t D\t E\t F");
        for (i=0; i<bytes_per_Sector; i++) {
@@ -82,10 +97,10 @@ public class NTFS {
         a.append(String.format("\n%-22s\t%d","MFT Mirror Start",location_$MFTMirr));
     }
     
-    public void readMFT(javax.swing.JTextArea a) throws IOException {
-        MFT[] mft_header = new MFT[200];
+    public void readMFT(javax.swing.JTextArea a, final javax.swing.JList list, Boolean forceReCalc) throws IOException, JAXBException {
+        MFT[] mft_header = new MFT[29952];      //Needs to be dynamic
         System.out.println(diskAccess.getFilePointer());
-        diskAccess.seek((location_$MFT*sectors_per_cluster*bytes_per_Sector)+17408);    //skip first 16 records
+        diskAccess.seek((location_$MFT*sectors_per_cluster*bytes_per_Sector));//+17408);    //skip first 16 records
         System.out.println("Max: "+total_sectors*bytes_per_Sector);
         System.out.println(diskAccess.getFilePointer());
         byte ar[] = new byte[1024];
@@ -94,13 +109,51 @@ public class NTFS {
         while(i < mft_header.length)
         {
 //            System.out.println("Offset: "+diskAccess.getFilePointer());
+            a.append("Sector: "+(diskAccess.getFilePointer()/bytes_per_Sector)+"\t\t");
             mft_header[i] = new MFT();
             diskAccess.read(ar);
-            mft_header[i].set_data(ar);
-            mft_header[i].print_data(a);
+            if(mft_header[i].set_data(ar,(diskAccess.getFilePointer()/bytes_per_Sector))){
+                mft_header[i].print_data(a);
+            }else{a.append("\n");}
             i++;
         }
-        
+        list(""+volume_serial_number);
+        listFiles(list);
     }
-    
+     public void list(String title) throws JAXBException{
+                FileList filelist = new FileList();
+        filelist.setFile(files);
+        // create JAXB context and instantiate marshaller
+        JAXBContext context = JAXBContext.newInstance(FileList.class);
+        Marshaller m = context.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE);
+        // Write to FileList .xml file
+        m.marshal(filelist, new File("src/cache/" + title + ".xml"));
+    }
+     
+     private void listFiles(final javax.swing.JList list) {
+        list.setEnabled(true);
+        list.setBackground(Color.white);
+        list.setSelectionForeground(Color.white);
+        DefaultListModel l1 = new DefaultListModel();
+        for (FileRecord file : files) {
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            java.net.URL imgUrl = getClass().getResource(file.img);
+            if (imgUrl != null) {
+                panel.add(new JLabel(new ImageIcon(imgUrl)));
+            }
+            panel.add(new JLabel(file.name + "   " + file.filesize));
+            l1.addElement(panel);
+        }
+        list.setModel(l1);
+        list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+        list.setSelectedIndex(0);
+        list.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                System.out.println(String.format("Selected: %s", list.getSelectedIndex()));
+            }
+        });
+        list.setCellRenderer(new CustomCellRenderer());
+    }
 }
