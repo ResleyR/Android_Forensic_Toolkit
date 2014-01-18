@@ -3,6 +3,7 @@
  * and open the template in the editor.
  */
 package android.forensic.toolkit;
+
 /**
  *
  * @author Resley Rodrigues
@@ -73,22 +74,31 @@ public class MFT {
     int Initialized_data_size_of_the_stream;    //8 bytes
 
     //Data_Runs_...
-    
-    
-    public void set_data(byte[] ar){
+    private static final String Image = "/res/deleted_file.png";
+
+    public boolean set_data(byte[] ar, long startSector){
         int i;
         int j;//=242;
+        FileRecord fileRec = new FileRecord();
+                String size = "NTFS Sizer Error";
+                String attrib="";
         Offset_to_Update_Sequence_Array = Utils.hexToInt(Utils.hex(ar[20]), Utils.hex(ar[21]));
         for(i=0;i<4;i++)        //byte 0-3  0x00-0x03
             File_Identifier = File_Identifier.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i]))));
         //Flags byte 22-23 0x16-0x17
         Flags = Utils.hexToInt(Utils.hex(ar[22]), Utils.hex(ar[23]));
+        if(Flags!=0){
+            return false;
+        }
         do {
             System.out.println("Offset: "+Utils.hex(Offset_to_Update_Sequence_Array));
         
             i = Offset_to_Update_Sequence_Array;
             System.out.print("i: "+Utils.hex(i));
             Attribute_Type = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]),Utils.hex(ar[i++]), Utils.hex(ar[i++]));
+            if(Attribute_Type==-1){
+                return false;
+            }
             System.out.print("\tType: "+Utils.hex(Attribute_Type));
             System.out.print("\ti: "+Utils.hex(i));
             int temp = Utils.hexToInt(Utils.hex(ar[i++]), Utils.hex(ar[i++]),Utils.hex(ar[i++]), Utils.hex(ar[i++]));      //Offset + Length of Attribute
@@ -102,10 +112,18 @@ public class MFT {
         Name_length = Utils.hexToInt(Utils.hex(ar[i]),"0");
         System.out.println("Offset: "+Utils.hex(i)+"\tName length: "+Utils.hex(ar[i++]));
         i++;
-        for(j=0;j<=(Name_length*2);j++){
+        for(j=0;j<(Name_length*2);j++){
            File_Name = File_Name.concat(String.valueOf(Utils.hexToText(Utils.hex(ar[i+j]))));
         }
         System.out.println(File_Name);
+        fileRec.setName(File_Name);
+                        fileRec.setAttributes(attrib);
+                        fileRec.setStartSector(startSector);
+                        fileRec.setImage(Image);
+                        fileRec.setFileSize(size);
+                        fileRec.setFoundAt(j);
+                        NTFS.files.add(fileRec);
+        return true;
     }
     
     public void print_data(javax.swing.JTextArea a){
@@ -114,4 +132,5 @@ public class MFT {
                 "\n");
     }
     
+   
 }
