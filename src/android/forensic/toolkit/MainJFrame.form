@@ -9,13 +9,12 @@
         <Property name="bounds" type="java.awt.Rectangle" editor="org.netbeans.beaninfo.editors.RectangleEditor">
           <Rectangle value="[0, 0, 300, 150]"/>
         </Property>
-        <Property name="resizable" type="boolean" value="false"/>
       </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Group type="102" alignment="0" attributes="0">
+              <Group type="102" attributes="0">
                   <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                       <Component id="jProgressBar1" max="32767" attributes="0"/>
@@ -41,6 +40,11 @@
                   </Group>
                   <EmptySpace pref="26" max="32767" attributes="0"/>
               </Group>
+              <Group type="102" alignment="1" attributes="0">
+                  <EmptySpace max="32767" attributes="0"/>
+                  <Component id="startClone" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="112" max="-2" attributes="0"/>
+              </Group>
           </Group>
         </DimensionLayout>
         <DimensionLayout dim="1">
@@ -60,7 +64,9 @@
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="jProgressBar1" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="32" max="32767" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="startClone" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="102" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -118,6 +124,14 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton5ActionPerformed"/>
           </Events>
         </Component>
+        <Component class="javax.swing.JButton" name="startClone">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Clone"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="startCloneActionPerformed"/>
+          </Events>
+        </Component>
       </SubComponents>
     </Container>
     <Container class="javax.swing.JDialog" name="hashDialog">
@@ -136,7 +150,7 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -144,7 +158,7 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="SHA1" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="SHA512" min="-2" max="-2" attributes="0"/>
+                                  <Component id="SHA256" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Group type="103" groupAlignment="1" attributes="0">
@@ -161,9 +175,9 @@
                                               <Component id="jLabel6" alignment="0" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="HashValue" min="-2" max="-2" attributes="0"/>
-                                              <Component id="jTextField3" min="-2" pref="171" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                              <Component id="jTextField3" pref="171" max="32767" attributes="0"/>
+                                              <Component id="HashValue" max="32767" attributes="0"/>
                                           </Group>
                                       </Group>
                                   </Group>
@@ -173,10 +187,11 @@
                                       <Component id="jButton7" min="-2" pref="75" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
+                              <Component id="HashProgressBar" alignment="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <Group type="102" alignment="0" attributes="0">
-                          <EmptySpace min="-2" pref="139" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="148" max="-2" attributes="0"/>
                           <Component id="jButton6" min="-2" pref="67" max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -191,7 +206,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="MD5" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="SHA1" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="SHA512" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="SHA256" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
@@ -215,8 +230,10 @@
                       <Component id="jButton7" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="HashProgressBar" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
                   <Component id="jButton6" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="60" max="32767" attributes="0"/>
+                  <EmptySpace pref="62" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -235,9 +252,9 @@
             <Property name="text" type="java.lang.String" value="SHA1"/>
           </Properties>
         </Component>
-        <Component class="javax.swing.JRadioButton" name="SHA512">
+        <Component class="javax.swing.JRadioButton" name="SHA256">
           <Properties>
-            <Property name="text" type="java.lang.String" value="SHA512"/>
+            <Property name="text" type="java.lang.String" value="SHA256"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel3">
@@ -258,9 +275,6 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="jTextField3">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="D:\u005cHashRecords\u005cDriveF.txt" containsInvalidXMLChars="true"/>
-          </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel4">
           <Properties>
@@ -291,9 +305,6 @@
           </Properties>
         </Component>
         <Component class="javax.swing.JTextField" name="HashValue">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="3DA3828BAC4918CAED8AA82F71"/>
-          </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="ComputeHash">
           <Properties>
@@ -321,6 +332,8 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="RefreshDriveList1ActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JProgressBar" name="HashProgressBar">
         </Component>
       </SubComponents>
     </Container>
@@ -399,10 +412,8 @@
                                       <EmptySpace type="separate" max="-2" attributes="0"/>
                                       <Component id="hash_disk" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="jTextField1" min="-2" max="-2" attributes="0"/>
                                   <Group type="102" attributes="0">
-                                      <Component id="lbl_Hash" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="68" max="-2" attributes="0"/>
                                       <Component id="Hash" min="-2" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
@@ -410,7 +421,7 @@
                       </Group>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="469" max="32767" attributes="0"/>
           </Group>
           <Component id="jTabbedPane1" alignment="1" max="32767" attributes="0"/>
           <Component id="jLayeredPane1" alignment="0" max="32767" attributes="0"/>
@@ -459,15 +470,11 @@
                       </Group>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jTextField1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="lbl_Hash" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="Hash" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
+                      <Component id="Hash" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="15" max="32767" attributes="0"/>
               <Component id="jLayeredPane1" min="-2" pref="207" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="jTabbedPane1" min="-2" pref="318" max="-2" attributes="0"/>
@@ -496,7 +503,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="VolumeLabel">
       <Properties>
-        <Property name="text" type="java.lang.String" value="vol_lbl"/>
         <Property name="toolTipText" type="java.lang.String" value=""/>
       </Properties>
       <AccessibilityProperties>
@@ -504,22 +510,10 @@
       </AccessibilityProperties>
     </Component>
     <Component class="javax.swing.JLabel" name="FreeSpace">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="free"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="TotalSpace">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="total"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="DriveType">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jLabel6"/>
-      </Properties>
-      <AccessibilityProperties>
-        <Property name="AccessibleContext.accessibleName" type="java.lang.String" value=""/>
-      </AccessibilityProperties>
     </Component>
     <Component class="javax.swing.JLabel" name="lbl_Label">
       <Properties>
@@ -541,11 +535,6 @@
         <Property name="text" type="java.lang.String" value="Type:"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JTextField" name="jTextField1">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="jTextField1"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JButton" name="RefreshDriveList">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
@@ -564,11 +553,6 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="RefreshDriveListActionPerformed"/>
       </Events>
-    </Component>
-    <Component class="javax.swing.JLabel" name="lbl_Hash">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="Hash Values"/>
-      </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="Hash">
     </Component>
@@ -652,85 +636,6 @@
                 <Property name="rows" type="int" value="5"/>
               </Properties>
             </Component>
-          </SubComponents>
-        </Container>
-        <Container class="javax.swing.JInternalFrame" name="jInternalFrame1">
-          <Properties>
-            <Property name="visible" type="boolean" value="true"/>
-          </Properties>
-          <Constraints>
-            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="tab3">
-                <Property name="tabTitle" type="java.lang.String" value="tab3"/>
-              </JTabbedPaneConstraints>
-            </Constraint>
-          </Constraints>
-
-          <Layout>
-            <DimensionLayout dim="0">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="962" max="32767" attributes="0"/>
-              </Group>
-            </DimensionLayout>
-            <DimensionLayout dim="1">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <EmptySpace min="0" pref="260" max="32767" attributes="0"/>
-              </Group>
-            </DimensionLayout>
-          </Layout>
-        </Container>
-        <Container class="javax.swing.JPanel" name="jPanel1">
-          <Constraints>
-            <Constraint layoutClass="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout" value="org.netbeans.modules.form.compat2.layouts.support.JTabbedPaneSupportLayout$JTabbedPaneConstraintsDescription">
-              <JTabbedPaneConstraints tabName="tab4">
-                <Property name="tabTitle" type="java.lang.String" value="tab4"/>
-              </JTabbedPaneConstraints>
-            </Constraint>
-          </Constraints>
-
-          <Layout>
-            <DimensionLayout dim="0">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace pref="377" max="32767" attributes="0"/>
-                      <Component id="jScrollPane1" min="-2" pref="244" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="357" max="-2" attributes="0"/>
-                  </Group>
-              </Group>
-            </DimensionLayout>
-            <DimensionLayout dim="1">
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane1" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="149" max="32767" attributes="0"/>
-                  </Group>
-              </Group>
-            </DimensionLayout>
-          </Layout>
-          <SubComponents>
-            <Container class="javax.swing.JScrollPane" name="jScrollPane1">
-              <AuxValues>
-                <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
-              </AuxValues>
-
-              <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
-              <SubComponents>
-                <Component class="javax.swing.JList" name="jList1">
-                  <Properties>
-                    <Property name="model" type="javax.swing.ListModel" editor="org.netbeans.modules.form.editors2.ListModelEditor">
-                      <StringArray count="5">
-                        <StringItem index="0" value="Item 1"/>
-                        <StringItem index="1" value="Item 2"/>
-                        <StringItem index="2" value="Item 3"/>
-                        <StringItem index="3" value="Item 4"/>
-                        <StringItem index="4" value="Item 5"/>
-                      </StringArray>
-                    </Property>
-                  </Properties>
-                </Component>
-              </SubComponents>
-            </Container>
           </SubComponents>
         </Container>
       </SubComponents>

@@ -63,10 +63,11 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         jButton4 = new javax.swing.JButton();
         jProgressBar1 = new javax.swing.JProgressBar();
         jButton5 = new javax.swing.JButton();
+        startClone = new javax.swing.JButton();
         hashDialog = new javax.swing.JDialog();
         MD5 = new javax.swing.JRadioButton();
         SHA1 = new javax.swing.JRadioButton();
-        SHA512 = new javax.swing.JRadioButton();
+        SHA256 = new javax.swing.JRadioButton();
         jLabel3 = new javax.swing.JLabel();
         jComboBox2 = new javax.swing.JComboBox();
         jTextField3 = new javax.swing.JTextField();
@@ -78,6 +79,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         HashValue = new javax.swing.JTextField();
         ComputeHash = new javax.swing.JButton();
         RefreshDriveList1 = new javax.swing.JButton();
+        HashProgressBar = new javax.swing.JProgressBar();
         HashAlgorithm = new javax.swing.ButtonGroup();
         FileSaveAs = new javax.swing.JFileChooser();
         DriveSelector = new javax.swing.JComboBox();
@@ -91,9 +93,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         lbl_FreeSpace = new javax.swing.JLabel();
         lbl_TotalSize = new javax.swing.JLabel();
         lbl_Type = new javax.swing.JLabel();
-        jTextField1 = new javax.swing.JTextField();
         RefreshDriveList = new javax.swing.JButton();
-        lbl_Hash = new javax.swing.JLabel();
         Hash = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         jSplitPane1 = new javax.swing.JSplitPane();
@@ -103,10 +103,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         BootSectorHexData = new javax.swing.JTextArea();
         PartitionTable = new javax.swing.JScrollPane();
         PartitionTableData = new javax.swing.JTextArea();
-        jInternalFrame1 = new javax.swing.JInternalFrame();
-        jPanel1 = new javax.swing.JPanel();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        jList1 = new javax.swing.JList();
         clone_disk = new javax.swing.JButton();
         hash_disk = new javax.swing.JButton();
         jLayeredPane1 = new javax.swing.JLayeredPane();
@@ -118,7 +114,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         cloneDialog.setTitle("Clone Disk - Android Forensic Toolkit");
         cloneDialog.setAlwaysOnTop(true);
         cloneDialog.setBounds(new java.awt.Rectangle(0, 0, 300, 150));
-        cloneDialog.setResizable(false);
 
         jComboBox1.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
             jComboBox1.addActionListener(new java.awt.event.ActionListener() {
@@ -150,6 +145,13 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                     }
                 });
 
+                startClone.setText("Clone");
+                startClone.addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        startCloneActionPerformed(evt);
+                    }
+                });
+
                 javax.swing.GroupLayout cloneDialogLayout = new javax.swing.GroupLayout(cloneDialog.getContentPane());
                 cloneDialog.getContentPane().setLayout(cloneDialogLayout);
                 cloneDialogLayout.setHorizontalGroup(
@@ -173,6 +175,10 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                     .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                     .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addContainerGap(26, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, cloneDialogLayout.createSequentialGroup()
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(startClone)
+                        .addGap(112, 112, 112))
                 );
                 cloneDialogLayout.setVerticalGroup(
                     cloneDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -189,7 +195,9 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                             .addComponent(jButton4))
                         .addGap(18, 18, 18)
                         .addComponent(jProgressBar1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(32, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(startClone)
+                        .addContainerGap(102, Short.MAX_VALUE))
                 );
 
                 hashDialog.setTitle("Compute Hash - Android Forensic Toolkit");
@@ -205,13 +213,11 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
 
                 SHA1.setText("SHA1");
 
-                SHA512.setText("SHA512");
+                SHA256.setText("SHA256");
 
                 jLabel3.setText("Choose Algorithm:");
 
                 jComboBox2.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "C:\\", "D:\\", "E:\\", "F:\\" }));
-
-                    jTextField3.setText("D:\\HashRecords\\DriveF.txt");
 
                     jLabel4.setText("Compare With:");
 
@@ -227,8 +233,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                     jButton7.setText("Browse");
 
                     jLabel6.setText("Hash Value:");
-
-                    HashValue.setText("3DA3828BAC4918CAED8AA82F71");
 
                     ComputeHash.setText("Compute");
                     ComputeHash.addActionListener(new java.awt.event.ActionListener() {
@@ -257,7 +261,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                 .addGroup(hashDialogLayout.createSequentialGroup()
                                     .addContainerGap()
-                                    .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                                         .addGroup(hashDialogLayout.createSequentialGroup()
                                             .addComponent(jLabel3)
                                             .addGap(18, 18, 18)
@@ -265,7 +269,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                             .addComponent(SHA1)
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                            .addComponent(SHA512))
+                                            .addComponent(SHA256))
                                         .addGroup(hashDialogLayout.createSequentialGroup()
                                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, hashDialogLayout.createSequentialGroup()
@@ -279,15 +283,16 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                                         .addComponent(jLabel4)
                                                         .addComponent(jLabel6))
                                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                    .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                                        .addComponent(HashValue, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                        .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 171, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                                    .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(jTextField3, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+                                                        .addComponent(HashValue))))
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                                 .addComponent(ComputeHash)
-                                                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                                .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 75, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(HashProgressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                                 .addGroup(hashDialogLayout.createSequentialGroup()
-                                    .addGap(139, 139, 139)
+                                    .addGap(148, 148, 148)
                                     .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addContainerGap(52, Short.MAX_VALUE))
                     );
@@ -298,7 +303,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(MD5)
                                 .addComponent(SHA1)
-                                .addComponent(SHA512)
+                                .addComponent(SHA256)
                                 .addComponent(jLabel3))
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(hashDialogLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -317,8 +322,10 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                 .addComponent(jLabel4)
                                 .addComponent(jButton7))
                             .addGap(18, 18, 18)
+                            .addComponent(HashProgressBar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGap(35, 35, 35)
                             .addComponent(jButton6)
-                            .addContainerGap(60, Short.MAX_VALUE))
+                            .addContainerGap(62, Short.MAX_VALUE))
                     );
 
                     FileSaveAs.setDialogType(javax.swing.JFileChooser.SAVE_DIALOG);
@@ -341,14 +348,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                         }
                     });
 
-                    VolumeLabel.setText("vol_lbl");
                     VolumeLabel.setToolTipText("");
-
-                    FreeSpace.setText("free");
-
-                    TotalSpace.setText("total");
-
-                    DriveType.setText("jLabel6");
 
                     lbl_Label.setText("Label:");
 
@@ -357,8 +357,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                     lbl_TotalSize.setText("Total Size:");
 
                     lbl_Type.setText("Type:");
-
-                    jTextField1.setText("jTextField1");
 
                     RefreshDriveList.setIcon(new javax.swing.ImageIcon(getClass().getResource("/android/forensic/toolkit/refresh.png"))); // NOI18N
                     RefreshDriveList.setToolTipText("Refresh");
@@ -371,8 +369,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                             RefreshDriveListActionPerformed(evt);
                         }
                     });
-
-                    lbl_Hash.setText("Hash Values");
 
                     jTabbedPane1.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
                     jTabbedPane1.setName(""); // NOI18N
@@ -396,47 +392,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                     PartitionTable.setViewportView(PartitionTableData);
 
                     jTabbedPane1.addTab("FAT", PartitionTable);
-
-                    jInternalFrame1.setVisible(true);
-
-                    javax.swing.GroupLayout jInternalFrame1Layout = new javax.swing.GroupLayout(jInternalFrame1.getContentPane());
-                    jInternalFrame1.getContentPane().setLayout(jInternalFrame1Layout);
-                    jInternalFrame1Layout.setHorizontalGroup(
-                        jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 962, Short.MAX_VALUE)
-                    );
-                    jInternalFrame1Layout.setVerticalGroup(
-                        jInternalFrame1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGap(0, 260, Short.MAX_VALUE)
-                    );
-
-                    jTabbedPane1.addTab("tab3", jInternalFrame1);
-
-                    jList1.setModel(new javax.swing.AbstractListModel() {
-                        String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-                        public int getSize() { return strings.length; }
-                        public Object getElementAt(int i) { return strings[i]; }
-                    });
-                    jScrollPane1.setViewportView(jList1);
-
-                    javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
-                    jPanel1.setLayout(jPanel1Layout);
-                    jPanel1Layout.setHorizontalGroup(
-                        jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                            .addContainerGap(377, Short.MAX_VALUE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 244, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGap(357, 357, 357))
-                    );
-                    jPanel1Layout.setVerticalGroup(
-                        jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addGroup(jPanel1Layout.createSequentialGroup()
-                            .addContainerGap()
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addContainerGap(149, Short.MAX_VALUE))
-                    );
-
-                    jTabbedPane1.addTab("tab4", jPanel1);
 
                     clone_disk.setText("Clone Disk");
                     clone_disk.addActionListener(new java.awt.event.ActionListener() {
@@ -516,12 +471,10 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                                     .addComponent(clone_disk)
                                                     .addGap(18, 18, 18)
                                                     .addComponent(hash_disk))
-                                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addGroup(layout.createSequentialGroup()
-                                                    .addComponent(lbl_Hash)
-                                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                    .addGap(68, 68, 68)
                                                     .addComponent(Hash)))))))
-                            .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addContainerGap(469, Short.MAX_VALUE))
                         .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                         .addComponent(jLayeredPane1)
                     );
@@ -561,19 +514,15 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                                         .addComponent(re_calc)
                                         .addComponent(recoverFiles)))
                                 .addGroup(layout.createSequentialGroup()
-                                    .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(lbl_Hash)
-                                        .addComponent(Hash))))
-                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addGap(26, 26, 26)
+                                    .addComponent(Hash)))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
                             .addComponent(jLayeredPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 207, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE))
                     );
 
                     VolumeLabel.getAccessibleContext().setAccessibleName("VolumeLabel");
-                    DriveType.getAccessibleContext().setAccessibleName("");
 
                     pack();
                 }// </editor-fold>//GEN-END:initComponents
@@ -589,22 +538,14 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
         VolumeLabel.setText(FileSystemView.getFileSystemView().getSystemDisplayName(temp));
         DriveType.setText(FileSystemView.getFileSystemView().getSystemTypeDescription(temp));
         FreeSpace.setText(freeSpace);
-//        TotalSpace.setText(totalSpace);
+        TotalSpace.setText(totalSpace);
 
         File diskRoot = new File("\\\\.\\" + path);
         RandomAccessFile diskAccess;
         try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
             diskAccess = new RandomAccessFile(diskRoot, "r");
-            byte[] content = new byte[1024];
+            byte[] content = new byte[512];
             diskAccess.readFully(content);
-            md.update(content);
-            Hash.setText(Utils.byteToHex(md.digest()));
-            String temp_str = "";
-            for (int i = 71; i <= 81; i++) {
-                temp_str = temp_str.concat(String.valueOf(Utils.hexToText(Utils.hex(content[i]))));
-            }
-        //    VolumeLabel.setText(temp_str);
 
             BootSectorData.setText("");
             PartitionTableData.setText("");
@@ -633,7 +574,7 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                         fat32.printBPB(BootSectorData,BootSectorHexData);
                         fat32.readFAT(PartitionTableData, fileList, false);
                         VolumeLabel.setText(fat32.label);
-                        jTextField1.setText(fat32.type);
+//                        jTextField1.setText(fat32.type);
                         if(fat32.total_sectors==0)
                             TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectorsL));
                         else
@@ -641,14 +582,14 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
                         break;
                     }
                 case "EB0090":
+                case "EB3C90":
                 {
                     fat16 = new FAT16();
                     jTabbedPane1.setTitleAt(1, "FAT");
                     fat16.getBPB(path);
                     fat16.printBPB(BootSectorData, BootSectorHexData);
-                    //disk.readFAT(PartitionTableData);
+                    fat16.readFAT(PartitionTableData,fileList,false);
                     VolumeLabel.setText(fat16.label);
-                    jTextField1.setText(fat16.type);
                     if(fat16.total_sectors==0)
                         TotalSpace.setText(Utils.getSize(fat16.bytes_per_Sector*fat16.total_sectorsL));
                     else
@@ -735,8 +676,6 @@ private FAT12 fat12; FAT16 fat16; FAT32 fat32; NTFS ntfs;   //disk objcts
 recoverFiles.setVisible(true);
         } catch (FileNotFoundException ex) {
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | NoSuchAlgorithmException ex) {
-            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -760,10 +699,10 @@ recoverFiles.setVisible(true);
         hashDialog.setVisible(true);
         MD5.setActionCommand("MD5");
         SHA1.setActionCommand("SHA1");
-        SHA512.setActionCommand("SHA512");
+        SHA256.setActionCommand("SHA512");
         HashAlgorithm.add(MD5);
         HashAlgorithm.add(SHA1);
-        HashAlgorithm.add(SHA512);
+        HashAlgorithm.add(SHA256);
     }//GEN-LAST:event_hash_diskActionPerformed
 
     private void re_calcActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_re_calcActionPerformed
@@ -787,7 +726,7 @@ recoverFiles.setVisible(true);
                         fat32.printBPB(BootSectorData,BootSectorHexData);
                         fat32.readFAT(PartitionTableData, fileList, true);
                         VolumeLabel.setText(fat32.label);
-                        jTextField1.setText(fat32.type);
+//                        jTextField1.setText(fat32.type);
                         if(fat32.total_sectors==0)
                             TotalSpace.setText(Utils.getSize(fat32.bytes_per_Sector*fat32.total_sectorsL));
                         else
@@ -833,45 +772,65 @@ recoverFiles.setVisible(true);
             long diskSize = spath.getTotalSpace();
             System.out.println("Disk size: " + diskSize + " or " + Utils.getSize(diskSize));
             System.out.println("Disk : "+spath.getAbsolutePath() + " or " + spath.getCanonicalPath());
-            MessageDigest m = null;
-            byte[] content = new byte[5242880];
+            final int size=10485760;  //5242880
+            
             ButtonModel algorithm = HashAlgorithm.getSelection();
-            String algo = algorithm.getActionCommand();
-            try {
-                m = MessageDigest.getInstance(algo);
-            } catch (NoSuchAlgorithmException ex) {
-                Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            File sxpath = new File("\\\\.\\" + jComboBox2.getSelectedItem().toString());
-            
-                RandomAccessFile diskAccess1 = new RandomAccessFile(sxpath, "r");
-            
-            m.reset();
-            StringBuilder hashString = new StringBuilder();
-            int stop = (int) (diskSize/5242880);
-            int extra = (int) (diskSize%5242880);
-            for(int i=0;i<=stop;i++)
-            {
-                System.out.println(i);
-                diskAccess1.readFully(content);
-            
-                m.update(content);
-                byte[] digest = m.digest(content);
-                BigInteger bigInt = new BigInteger(1,digest);
-                hashString = hashString.append(bigInt.toString(16));
-//                System.out.println(hashString);
-            }
-            content = new byte[extra];
-            m.update(content);
-                byte[] digest = m.digest(content);
-                BigInteger bigInt = new BigInteger(1,digest);
-                hashString = hashString.append(bigInt.toString(16));
-                
-                
-            m.update(String.valueOf(hashString).getBytes());
-            digest = m.digest(String.valueOf(hashString).getBytes());
-            bigInt = new BigInteger(1,digest);
-                HashValue.setText(bigInt.toString(16));
+            final String algo = algorithm.getActionCommand();
+
+            final int stop = (int) (diskSize/size);
+            final int extra = (int) (diskSize%size);
+            HashProgressBar.setMaximum(stop);
+            HashProgressBar.setMinimum(0);
+            HashProgressBar.setStringPainted(true);
+            System.out.println("extra "+extra);
+            System.out.println("Stop: "+stop);
+            Thread thread = new Thread(new Runnable() {
+
+                                @Override
+                                public void run() {
+                                    try {
+                                        StringBuilder hashString = new StringBuilder();
+                                                                MessageDigest m = null;
+                                                        byte[] content = new byte[size];
+                                                                    try {
+                                                            m = MessageDigest.getInstance(algo);
+                                                        } catch (NoSuchAlgorithmException ex) {
+                                                            Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                                                        }
+                                                        File sxpath = new File("\\\\.\\" + jComboBox2.getSelectedItem().toString());
+                                                        
+                                                            RandomAccessFile diskAccess1 = new RandomAccessFile(sxpath, "r");
+                                                        
+                                                        m.reset();
+                                                                for(int i=0;i<stop;i++)
+                                                        {
+                                                            HashProgressBar.setValue(i);
+                                                            diskAccess1.readFully(content);
+                                                            m.update(content);
+                                                            byte[] digest = m.digest(content);
+                                                            BigInteger bigInt = new BigInteger(1,digest);
+                                                            hashString = hashString.append(bigInt.toString(16));
+                                                        }
+                                                        content = new byte[extra];
+                                                        m.update(content);
+                                                            byte[] digest = m.digest(content);
+                                                            BigInteger bigInt = new BigInteger(1,digest);
+                                                            hashString = hashString.append(bigInt.toString(16));
+                                                            HashProgressBar.setValue(stop);
+                                                         //   System.out.println("reached end");
+                                                        m.update(String.valueOf(hashString).getBytes());
+                                                        digest = m.digest(String.valueOf(hashString).getBytes());
+                                                        bigInt = new BigInteger(1,digest);
+                                                            HashValue.setText(bigInt.toString(16));
+                                                            HashProgressBar.setString("Completed Hashing");
+                                    } catch (FileNotFoundException ex) {
+                                        Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+                            });
+            thread.start();
         } catch (IOException ex) {
             Logger.getLogger(MainJFrame.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -896,6 +855,13 @@ recoverFiles.setVisible(true);
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         int returnVal = FileSaveAs.showSaveDialog(this);
     if (returnVal == JFileChooser.APPROVE_OPTION) {
+         System.out.println("User selected a file");
+    } else {
+        System.out.println("File access cancelled by user.");
+    }
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void startCloneActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startCloneActionPerformed
         File file = FileSaveAs.getSelectedFile();
         try {
           // What to do with the file, e.g. display it in a TextArea
@@ -921,10 +887,7 @@ recoverFiles.setVisible(true);
         } catch (IOException ex) {
           System.out.println("problem accessing file"+file.getAbsolutePath());
         }
-    } else {
-        System.out.println("File access cancelled by user.");
-    }
-    }//GEN-LAST:event_jButton4ActionPerformed
+    }//GEN-LAST:event_startCloneActionPerformed
 
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
@@ -973,6 +936,7 @@ recoverFiles.setVisible(true);
     private javax.swing.JLabel FreeSpace;
     private javax.swing.JLabel Hash;
     private javax.swing.ButtonGroup HashAlgorithm;
+    private javax.swing.JProgressBar HashProgressBar;
     private javax.swing.JTextField HashValue;
     private javax.swing.JRadioButton MD5;
     private javax.swing.JScrollPane PartitionTable;
@@ -980,7 +944,7 @@ recoverFiles.setVisible(true);
     private javax.swing.JButton RefreshDriveList;
     private javax.swing.JButton RefreshDriveList1;
     private javax.swing.JRadioButton SHA1;
-    private javax.swing.JRadioButton SHA512;
+    private javax.swing.JRadioButton SHA256;
     private javax.swing.JLabel TotalSpace;
     private javax.swing.JLabel VolumeLabel;
     private javax.swing.JDialog cloneDialog;
@@ -995,7 +959,6 @@ recoverFiles.setVisible(true);
     private javax.swing.JButton jButton7;
     private javax.swing.JComboBox jComboBox1;
     private javax.swing.JComboBox jComboBox2;
-    private javax.swing.JInternalFrame jInternalFrame1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -1003,23 +966,19 @@ recoverFiles.setVisible(true);
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLayeredPane jLayeredPane1;
-    private javax.swing.JList jList1;
-    private javax.swing.JPanel jPanel1;
     private javax.swing.JProgressBar jProgressBar1;
-    private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JSplitPane jSplitPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
-    private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JLabel lbl_FreeSpace;
-    private javax.swing.JLabel lbl_Hash;
     private javax.swing.JLabel lbl_Label;
     private javax.swing.JLabel lbl_SelectDrive;
     private javax.swing.JLabel lbl_TotalSize;
     private javax.swing.JLabel lbl_Type;
     public static javax.swing.JButton re_calc;
     public static javax.swing.JButton recoverFiles;
+    private javax.swing.JButton startClone;
     // End of variables declaration//GEN-END:variables
 }
