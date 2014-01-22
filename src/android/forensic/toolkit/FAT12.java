@@ -235,7 +235,8 @@ public class FAT12 {
             StringBuilder b = new StringBuilder("\t0\t1\t2\t3\t4\t5\t6\t7\t\t8\t9\tA\tB\tC\tD\tE\tF\n");
             int j = 0, old_j = 0, new_j;
             int number_of_root_sectors = 2;         //needs to be dynamic
-            int last_byte_in_root = number_of_root_sectors * sectors_per_cluster * bytes_per_Sector;
+//            int last_byte_in_root = number_of_root_sectors * sectors_per_cluster * bytes_per_Sector;
+            int last_byte_in_root = number_of_root_directory_entries*32;
             System.out.println("last byte:   "+last_byte_in_root);
             System.out.println("65k entries: "+(65536*32));
             filelister:
@@ -372,9 +373,9 @@ public class FAT12 {
     }
 
     public void readFAT(javax.swing.JTextArea a, final javax.swing.JList list, Boolean forceReCalc) throws IOException, JAXBException {
-        int first_cluster = reserved_sectors*bytes_per_Sector;
         first_data_sector = reserved_sectors + (number_of_FAT_copies * sectors_per_FAT);
-        jumpto = (int) (first_cluster - 2 + first_data_sector) * bytes_per_Sector;
+        jumpto = (int) (first_data_sector * bytes_per_Sector);
+        System.out.println("jump to: "+jumpto);
         diskAccess.seek(jumpto);
         title = "" + serial_number;
         File cachedXML = new File("src/cache/" + title + ".xml");
@@ -438,7 +439,7 @@ public class FAT12 {
         if (!list.isSelectionEmpty()) {
             int indices[] = list.getSelectedIndices();
             System.out.println("Jumpto value: " + jumpto + "\t\tAll foundAt relative to this");
-            byte ar[] = new byte[32];
+            byte ar[] = new byte[512];
             diskRoot = new File(path);
             System.out.println("\\\\.\\" + path);
             diskAccess = new RandomAccessFile("\\\\.\\" + diskRoot, "r");
